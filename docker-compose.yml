@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  engine:
+    build: 
+      context: ./engine
+    ports:
+      - '8000:8000'
+    environment:
+      - BLOCKCHAIN_URL=http://blockchain:3000
+    depends_on:
+      - blockchain
+    networks:
+      - symbio-net
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - '3000:3000'
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - engine
+    networks:
+      - symbio-net
+
+  blockchain:
+    build:
+      context: ./blockchain
+    ports:
+      - '3000:3000'
+      - '8080:8080'
+    networks:
+      - symbio-net
+
+networks:
+  symbio-net:
+    driver: bridge
