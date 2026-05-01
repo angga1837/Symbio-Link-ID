@@ -4,15 +4,26 @@ import React, { useState } from "react";
 import WasteForm from "../components/WasteForm";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function Dashboard() {
-  const [results, setResults] = useState<any[]>([]);
+interface TransactionResult {
+  sender_factory_id: string;
+  material_type: string;
+  volume_kg: number;
+  system_outputs?: {
+    ml_purity_score?: number;
+    optimization_status?: string;
+    blockchain_tx_hash?: string;
+  };
+}
 
-  const handleResult = (newResult: any) => {
+export default function Dashboard() {
+  const [results, setResults] = useState<TransactionResult[]>([]);
+
+  const handleResult = (newResult: TransactionResult) => {
     setResults((prev) => [newResult, ...prev]);
   };
 
   const chartData = results.map((r, idx) => ({
-    name: "Tx " + (idx + 1),
+    name: "Tx " + (idx + 1).toString(),
     ml_purity: r.system_outputs?.ml_purity_score || 0.986,
     co2_saved_kg: Math.round(r.volume_kg * 1.5), 
   })).reverse();

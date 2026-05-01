@@ -15,9 +15,9 @@ services:
     build:
       context: ./frontend
     ports:
-      - '3000:3000'
+      - '3001:3000' # CHANGED: Now uses 3001 to avoid collision
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://engine:8000 # CHANGED: Uses service name
     depends_on:
       - engine
     networks:
@@ -27,7 +27,7 @@ services:
     image: ibmcom/ibp-microfab
     container_name: symbio-link-blockchain
     ports:
-      - '3000:3000'
+      - '3000:3000' # Keeps 3000
     networks:
       - symbio-net
 
