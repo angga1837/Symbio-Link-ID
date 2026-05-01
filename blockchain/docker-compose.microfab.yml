@@ -1,0 +1,10 @@
+services:
+  microfab:
+    image: ibmcom/ibp-microfab:latest
+    container_name: symbio-microfab
+    environment:
+      FABRIC_LOGGING_SPEC: info
+      MICROFAB_DEBUG: "true"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
