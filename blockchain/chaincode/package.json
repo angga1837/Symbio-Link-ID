@@ -1,0 +1,9 @@
+{
+  "name": "symbiosis-chaincode",
+  "version": "1.0.0",
+  "private": true,
+  "main": "symbiosis_contract.js",
+  "dependencies": {
+    "fabric-contract-api": "^2.5.0"
+  }
+}
