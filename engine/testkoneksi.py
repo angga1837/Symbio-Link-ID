@@ -1,23 +1,26 @@
 import requests
-import time
+import sys
+import os
 
-def test_connectivity(target_url):
-    print(f"konesi tes ke: {target_url}")
+def test_blockchain_connectivity(target_url):
+    print(f"Ngecek koneksi Engine ke Blockchain Gateway di: {target_url}/health")
     try:
-        
-        response = requests.get(target_url, timeout=5)
+        response = requests.get(f"{target_url}/health", timeout=5)
         
         if response.status_code == 200:
-            print(f"Koneksi suksess! Status: {response.status_code}")
-            print(f"Respons server: {response.json()}")
+            print(f"Koneksi ke Blockchain Gateway sukses! Respons: {response.json()}")
         else:
-            print(f"Server terhubung, tetapi eror. Status: {response.status_code}")
+            print(f"Server terkonek, tapi ada respons error. Status: {response.status_code}")
             
     except requests.exceptions.ConnectionError:
-        print("Koneksi gagal: Tidak bisa menemukan server. Pastikan container sudah running.")
+        print(f"Koneksi gagal: Tidak bisa menemukan server di {target_url}.")
+        print("Pastikan nama service di docker-compose adalah 'blockchain'.")
+        sys.exit(1)
     except Exception as e:
-        print(f"Eror: {e}")
+        print(f"Error sistem: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    URL_TARGET = "http://localhost:8000/"  #ganti dengan service di docker
-    test_connectivity(URL_TARGET)
+    
+    URL_TARGET = os.getenv("BLOCKCHAIN_URL", "http://blockchain:3000")
+    test_blockchain_connectivity(URL_TARGET)

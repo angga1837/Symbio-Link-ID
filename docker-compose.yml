@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   engine:
     build: 
@@ -7,7 +5,7 @@ services:
     ports:
       - '8000:8000'
     environment:
-      - BLOCKCHAIN_URL=http://blockchain:3000
+      - BLOCKCHAIN_URL=http://blockchain:8080
     depends_on:
       - blockchain
     networks:
@@ -26,11 +24,10 @@ services:
       - symbio-net
 
   blockchain:
-    build:
-      context: ./blockchain
+    image: ibmcom/ibp-microfab
+    container_name: symbio-link-blockchain
     ports:
       - '3000:3000'
-      - '8080:8080'
     networks:
       - symbio-net
 
