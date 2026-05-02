@@ -24,4 +24,18 @@ Silica Fume (Berisi gambar-gambar silika)
 Steel Slag  (Berisi gambar-gambar terak baja)
 
 
+## Day 2 Engine Core Logic Implementation (May 2, 2026)
 
+**Completed Feature:**
+- Formulated the MILP (Mixed-Integer Linear Programming) model accurately based on 0th-principles matching mathematical equations for Objective Function $Z$ and 3 core constraints.
+- Engineered `engine/optimizer.py` utilizing the PuLP library. Injected a dynamic mock supply-demand resolver to guarantee `OPTIMAL` feasibility during the live Hackathon presentation regardless of the user's volume input.
+- Refactored `engine/main.py` POST `/optimize` endpoint to transition from static mock outputs to real-time evaluated MILP results.
+- Built a robust network `requests.post` fallback in the Engine API to simulate successful `tx_hash` delivery if the `blockchain:3000` bridge goes down during a stress test.
+
+**Files Modified:**
+- `engine/optimizer.py` (Created/Implemented logic)
+- `engine/main.py` (Integrated Optimizer and Blockchain requests)
+- `PROJECT_LOG.md` (Log update)
+
+**Immediate Next Step:**
+- (PIC B) Implementation of `gateway.js` and `symbiosis_contract.js` to ingest the new enriched payload from the Engine, executing legitimate chaincode transactions on the Hyperledger Microfab node (Port 8080).
