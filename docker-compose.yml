@@ -5,7 +5,7 @@ services:
     ports:
       - '8000:8000'
     environment:
-      - BLOCKCHAIN_URL=http://blockchain:8080
+      - BLOCKCHAIN_URL=http://blockchain:3000 
     depends_on:
       - blockchain
     networks:
@@ -15,19 +15,20 @@ services:
     build:
       context: ./frontend
     ports:
-      - '3001:3000' # CHANGED: Now uses 3001 to avoid collision
+      - '3001:3000' 
     environment:
-      - NEXT_PUBLIC_API_URL=http://engine:8000 # CHANGED: Uses service name
+      - NEXT_PUBLIC_API_URL=http://engine:8000 
     depends_on:
       - engine
     networks:
       - symbio-net
 
   blockchain:
-    image: ibmcom/ibp-microfab
+    build: 
+      context: ./blockchain
     container_name: symbio-link-blockchain
     ports:
-      - '3000:3000' # Keeps 3000
+      - '3000:3000' 
     networks:
       - symbio-net
 

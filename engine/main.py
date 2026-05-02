@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://blockchain:3000")
+BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://symbio-link-blockchain:3000")
 
 class SymbiosisRequest(BaseModel):
     sender_factory_id: str = Field(..., description="ID unik pabrik pengirim limbah")
