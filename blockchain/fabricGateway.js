@@ -8,15 +8,23 @@ const { Gateway, Wallets } = require("fabric-network");
  * Falls back to deterministic hash mode for local/offline runs.
  */
 async function submitToFabric(transaction) {
-  const mode = process.env.BLOCKCHAIN_MODE || "auto";
-  if (mode === "fabric" || mode === "auto") {
-    const result = await tryFabricSubmit(transaction);
-    if (result) {
-      return result;
-    }
-    if (mode === "fabric") {
-      throw new Error("BLOCKCHAIN_MODE=fabric but Fabric connection failed");
-    }
+  const mode = (process.env.BLOCKCHAIN_MODE || "auto").toLowerCase();
+
+  if (mode === "mock") {
+    return fallbackHashSubmit(transaction);
+  }
+
+  if (mode !== "auto" && mode !== "fabric") {
+    throw new Error(`Unsupported BLOCKCHAIN_MODE: ${mode}`);
+  }
+
+  const result = await tryFabricSubmit(transaction);
+  if (result) {
+    return result;
+  }
+
+  if (mode === "fabric") {
+    throw new Error("BLOCKCHAIN_MODE=fabric but Fabric connection failed");
   }
 
   return fallbackHashSubmit(transaction);
@@ -60,6 +68,11 @@ async function tryFabricSubmit(transaction) {
 
     const digest = crypto.createHash("sha256").update(payload).digest("hex");
     return `fabric-${digest.slice(0, 32)}`;
+  } catch (error) {
+    if (process.env.BLOCKCHAIN_MODE?.toLowerCase() === "fabric") {
+      throw error;
+    }
+    return null;
   } finally {
     gateway.disconnect();
   }

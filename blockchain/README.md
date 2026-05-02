@@ -45,7 +45,7 @@ The gateway normalizes them before committing.
 - `FABRIC_CHANNEL` (default `mychannel`)
 - `FABRIC_CHAINCODE` (default `symbiosis`)
 
-## Objective 1: Run Microfab On Port 8080
+## Objective 1: Run Microfab On Port 8080 (DONE)
 
 Use the dedicated compose file inside this folder.
 
@@ -58,3 +58,39 @@ Use the dedicated compose file inside this folder.
 
 ### Stop
 - `docker compose -f blockchain/docker-compose.microfab.yml down`
+
+## Objective 2-3 Verification
+
+Objective 1 (Microfab on `8080`) is a precondition for strict Fabric mode.
+
+### 1) Install and run gateway
+- `cd blockchain`
+- `npm install`
+- `npm start` (listens on **3001** by default; set `PORT` to override, e.g. `set PORT=3002` on Windows)
+
+### 2) Health check
+- `GET http://localhost:3001/health`
+
+### 3) Write transaction (auto-fallback compatible)
+- `POST http://localhost:3001/transactions`
+- Example payload:
+  ```json
+  {
+    "sender_factory_id": "FACTORY-001",
+    "material_type": "Copper Sludge",
+    "volume_kg": 500,
+    "system_outputs": {
+      "ml_purity_score": 0.986,
+      "optimization_status": "MATCH_FOUND"
+    }
+  }
+  ```
+
+### 4) Read audit records
+- `GET http://localhost:3001/transactions`
+- `GET http://localhost:3001/transactions/{blockchain_tx_hash}`
+
+### 5) Mode checks
+- Auto mode (default): `BLOCKCHAIN_MODE=auto`
+- Strict Fabric mode: `BLOCKCHAIN_MODE=fabric` (fails if Fabric credentials are not configured)
+- Mock mode: `BLOCKCHAIN_MODE=mock`
