@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import requests
@@ -7,6 +7,7 @@ import os
 
 from optimizer import solve_symbiosis_milp
 from predictor import predict_quality
+from vision_predictor import predict_image
 
 app = FastAPI(title="Symbio-Link ID Engine")
 
@@ -24,9 +25,23 @@ class SymbiosisRequest(BaseModel):
     sender_factory_id: str = Field(..., description="ID unik pabrik pengirim limbah")
     material_type: str = Field(..., description="Jenis material sisa (misal: Sludge Tembaga, Fly Ash)")
     volume_kg: float = Field(..., description="Berat material dalam kilogram")
-    ph_level: float = Field(..., description="Tingkat keasaman untuk prediksi ML")
+    ph_level: float = Field(default=7.0, description="Tingkat keasaman untuk prediksi ML")
     moisture: Optional[float] = Field(10.0, description="Tingkat kelembapan untuk prediksi ML (%)")
 
+
+@app.post("/classify")
+async def classify_material_image(file: UploadFile = File(...)):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Tidak ada file yang diunggah")
+    
+    image_bytes = await file.read()
+    predicted_material = predict_image(image_bytes)
+    
+    if predicted_material == "Gagal Identifikasi" or predicted_material == "Model Tidak Tersedia":
+         raise HTTPException(status_code=500, detail=predicted_material)
+         
+    return {"predicted_material": predicted_material}
+   
 @app.post("/optimize")
 async def optimize(data: SymbiosisRequest):
     # Trust layer makai ML regresi

@@ -41,20 +41,21 @@ Steel Slag  (Berisi gambar-gambar terak baja)
 - (PIC B) Implementation of `gateway.js` and `symbiosis_contract.js` to ingest the new enriched payload from the Engine, executing legitimate chaincode transactions on the Hyperledger Microfab node (Port 8080).
 
 
-## Day 3 Trust Layer & Gateway Integration (May 3, 2026)
+## Day 3 Trust Layer, Vision API & Environment Sync (May 3, 2026)
 
 **Completed Feature:**
-- Developed `train_offline.py` to generate synthetic tabular data (pH, moisture, volume) and train a `scikit-learn` Linear Regression model offline.
-- Implemented `engine/predictor.py` to load `symbio_model.pkl` and serve as the Machine Learning "Gatekeeper".
-- Updated `engine/main.py` `/optimize` endpoint: Incoming payloads are now evaluated by the ML model. If the predicted extraction purity is < 80%, the request is instantly `REJECTED`, bypassing the MILP algorithm to save compute and enforce strict ESG standards.
-- Resolved Docker internal networking issues, ensuring the FastAPI Engine successfully posts transactions to the Node.js Express Gateway at `http://symbio-link-blockchain:3000/transactions`.
-- Prepared the Computer Vision pipeline utilizing TensorFlow and MobileNetV2 Transfer Learning for automated waste classification (Fly Ash, Silica Fume, Steel Slag).
+- **[Trust Layer ML]** Developed data generation and trained a `scikit-learn` Linear Regression model. Implemented ML Gatekeeper at `/optimize` endpoint to instantly reject transactions with < 80% predicted purity, enforcing strict ESG standards before hitting the MILP algorithm.
+- **[Computer Vision API]** Successfully integrated the trained `vision_model.h5` (MobileNetV2) into the backend. Created the `/classify` endpoint in `engine/main.py` to ingest frontend image uploads and automatically categorize waste (Fly Ash, Silica Fume, Steel Slag).
+- **[Dependency Synchronization]** Resolved complex version mismatch errors (Keras 3 `quantization_config` and Scikit-Learn 1.8.0 incompatibility) by upgrading the Engine Dockerfile base image to `python:3.11-slim` to match the Google Colab training environment.
+- **[Gateway Routing]** Resolved internal Docker networking bottlenecks. The FastAPI Engine now successfully posts validated and ML-approved payloads to the Node.js Express Gateway (`http://symbio-link-blockchain:3000`).
 
 **Files Modified:**
-- `engine/train_offline.py` (Created data generation & model training script)
-- `engine/predictor.py` (Created ML loading & prediction logic)
-- `engine/main.py` (Integrated ML Gatekeeper and fixed blockchain routing)
-- `docker-compose.yml` (Fixed network routing to port 3000)
+- `engine/Dockerfile` (Upgraded base image to python:3.11-slim)
+- `engine/requirements.txt` (Locked tf-cpu and scikit-learn versions)
+- `engine/main.py` (Added `/classify` endpoint & ML Gatekeeper logic)
+- `engine/predictor.py` (ML loading & prediction logic)
+- `docker-compose.yml` (Fixed routing configuration)
 
 **Immediate Next Step:**
-- Finalize the Computer Vision `vision_model.h5` training in Google Colab and prepare the `/classify` API endpoint to ingest images before triggering `/optimize`.
+- UI/UX polish on the Frontend (`WasteForm.tsx`) to ensure smooth loading states during image classification and MILP optimization.
+- Live-test the complete end-to-end flow: Image Upload -> CV Classification -> ML Gatekeeper -> MILP Optimization -> Blockchain Ledger.

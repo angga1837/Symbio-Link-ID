@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -32,7 +32,45 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
   });
 
   const [loading, setLoading] = useState(false);
+  const [identifying, setIdentifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIdentifying(true);
+    setError(null);
+
+    const formDataImage = new FormData();
+    formDataImage.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:8000/classify", {
+        method: "POST",
+        body: formDataImage,
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengidentifikasi gambar");
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, material_type: data.predicted_material }));
+      
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Gagal menghubungi server ML");
+      }
+    } finally {
+      setIdentifying(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,14 +85,13 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
         water_content_percentage: formData.water_content_percentage ? parseFloat(formData.water_content_percentage) : undefined,
       });
 
-      const response = await fetch("http://localhost:8000/api/v1/optimize", {
+      const response = await fetch("http://localhost:8000/optimize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsedData),
       });
 
-      const result: OptimizationResultType = await response.json();
-      
+      const result = await response.json();
       onResult(result as OptimizationResult);
       
     } catch (err: unknown) {
@@ -69,9 +106,10 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
   };
 
   return (
-    <div className="bg-white p-6 shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-4 text-blue-900">Exchange Material</h2>
-      {error && <div className="text-red-500 mb-4 text-sm">{error}</div>}
+    <div className="bg-white p-6 shadow-md rounded-lg border border-slate-200">
+      <h2 className="text-xl font-bold mb-4 text-slate-800">Exchange Material</h2>
+      {error && <div className="text-red-500 mb-4 text-sm bg-red-50 p-3 rounded">{error}</div>}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Factory ID</label>
@@ -86,14 +124,34 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Material Type</label>
-          <input
-            type="text"
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            value={formData.material_type}
-            onChange={(e) => setFormData({ ...formData, material_type: e.target.value })}
-            placeholder="e.g. SLAG"
-            required
-          />
+          <div className="mt-1 flex gap-2">
+            <input
+              type="text"
+              className="block w-full p-2 border border-gray-300 rounded-md bg-slate-50"
+              value={formData.material_type}
+              onChange={(e) => setFormData({ ...formData, material_type: e.target.value })}
+              placeholder="Ketik nama atau deteksi gambar..."
+              required
+            />
+            
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+            />
+            
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={identifying}
+              className="whitespace-nowrap bg-slate-100 text-slate-700 font-semibold px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-200 transition"
+            >
+              {identifying ? "Deteksi..." : "Auto-Detect"}
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">Tidak tahu namanya? Klik Auto-Detect dan upload foto material.</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Volume (kg)</label>
@@ -108,10 +166,11 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
             step="0.1"
           />
         </div>
+
         <button
           type="submit"
           className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition"
-          disabled={loading}
+          disabled={loading || identifying}
         >
           {loading ? "Processing..." : "Find Symbiosis Match"}
         </button>
@@ -119,4 +178,3 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
     </div>
   );
 }
-type OptimizationResultType = OptimizationResult;
