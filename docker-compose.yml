@@ -28,7 +28,7 @@ services:
       context: ./blockchain
     container_name: symbio-link-blockchain
     ports:
-      - '3000:3000' 
+      - '4000:4000' 
     networks:
       - symbio-net
 
