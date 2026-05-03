@@ -24,6 +24,8 @@ The system MUST prevent corporate trade secret leaks. The ledger entries must be
 - `GET /transactions`
 - `GET /transactions/:txHash`
 - `POST /transactions`
+- `POST /commit` (RESTful Bridge for Engine)
+
 
 ### Payload Compatibility
 To accommodate existing upstream services, gateway accepts either:
@@ -66,13 +68,30 @@ Objective 1 (Microfab on `8080`) is a precondition for strict Fabric mode.
 ### 1) Install and run gateway
 - `cd blockchain`
 - `npm install`
-- `npm start` (listens on **3001** by default; set `PORT` to override, e.g. `set PORT=3002` on Windows)
+- `npm start` (listens on **4000** by default)
+
 
 ### 2) Health check
-- `GET http://localhost:3001/health`
+- `GET http://localhost:4000/health`
 
-### 3) Write transaction (auto-fallback compatible)
-- `POST http://localhost:3001/transactions`
+
+### 3) Commit transaction (Engine Bridge)
+- `POST http://localhost:4000/commit`
+- This endpoint simulates the `fabric-network` SDK commit process.
+- Example payload:
+  ```json
+  {
+    "sender": "FACTORY-001",
+    "material": "Copper Sludge",
+    "volume": 500,
+    "ml_prediction": 0.986,
+    "milp_optimized": true
+  }
+  ```
+
+### 4) Write transaction (Legacy/Auto-fallback)
+- `POST http://localhost:4000/transactions`
+
 - Example payload:
   ```json
   {
@@ -86,11 +105,12 @@ Objective 1 (Microfab on `8080`) is a precondition for strict Fabric mode.
   }
   ```
 
-### 4) Read audit records
-- `GET http://localhost:3001/transactions`
-- `GET http://localhost:3001/transactions/{blockchain_tx_hash}`
+### 5) Read audit records
+- `GET http://localhost:4000/transactions`
+- `GET http://localhost:4000/transactions/{blockchain_tx_hash}`
 
-### 5) Mode checks
+### 6) Mode checks
+
 - Auto mode (default): `BLOCKCHAIN_MODE=auto`
 - Strict Fabric mode: `BLOCKCHAIN_MODE=fabric` (fails if Fabric credentials are not configured)
 - Mock mode: `BLOCKCHAIN_MODE=mock`
