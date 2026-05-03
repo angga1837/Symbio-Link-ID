@@ -2,8 +2,11 @@ fastapi
 uvicorn
 pydantic
 pulp
-scikit-learn
+scikit-learn==1.8.0
 requests
 typing
 numpy
 joblib
+tensorflow-cpu>=2.16.1
+Pillow
+python-multipart
