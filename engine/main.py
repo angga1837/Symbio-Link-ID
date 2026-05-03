@@ -6,6 +6,7 @@ import requests
 import os
 
 from optimizer import solve_symbiosis_milp
+from predictor import predict_quality
 
 app = FastAPI(title="Symbio-Link ID Engine")
 
@@ -21,24 +22,40 @@ BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://symbio-link-blockch
 
 class SymbiosisRequest(BaseModel):
     sender_factory_id: str = Field(..., description="ID unik pabrik pengirim limbah")
-    material_type: str = Field(..., description="Jenis material sisa (misal: Sludge Tembaga)")
+    material_type: str = Field(..., description="Jenis material sisa (misal: Sludge Tembaga, Fly Ash)")
     volume_kg: float = Field(..., description="Berat material dalam kilogram")
-    ph_level: Optional[float] = Field(None, description="Tingkat keasaman untuk prediksi ML")
+    ph_level: float = Field(..., description="Tingkat keasaman untuk prediksi ML")
+    moisture: Optional[float] = Field(10.0, description="Tingkat kelembapan untuk prediksi ML (%)")
 
 @app.post("/optimize")
 async def optimize(data: SymbiosisRequest):
-    ml_purity_score = 0.986
-    if data.ph_level is not None and (data.ph_level < 5 or data.ph_level > 10):
-        ml_purity_score = 0.75  # Penalti kualitas jika pH melenceng
+    # Trust layer makai ML regresi
+    ml_score = predict_quality(data.ph_level, data.moisture, data.volume_kg)
 
+    if ml_score < 0.80:
+        return {
+            "status": "REJECTED",
+            "reason": "Limbah tidak memenuhi standar ekstraksi kritis (<80% purity score).",
+            "ml_purity_score": ml_score
+        }
+
+    # optimisasi layer makai MILP
     milp_result = solve_symbiosis_milp(data.sender_factory_id, data.volume_kg)
-    optimization_status = "MATCH_FOUND" if milp_result["status"] == "OPTIMAL" else "PENDING"
+    optimization_status = "MATCH_FOUND" if milp_result["status"] == "OPTIMAL" else "FAILED"
     
+    if optimization_status == "FAILED":
+        return {
+            "status": "FAILED",
+            "reason": "Tidak ditemukan rute optimasi supply-demand yang memungkinkan.",
+            "ml_purity_score": ml_score
+        }
+
+    # Layer ngirim ke blokchain
     payload = data.model_dump()
     payload["optimal_routes"] = milp_result.get("routes", {})
     payload["total_cost"] = milp_result.get("optimal_cost", 0)
-
-    # integral 
+    payload["ml_purity_score"] = ml_score
+    
     tx_hash = "PENDING"
     try:
         response = requests.post(f"{BLOCKCHAIN_GATEWAY_URL}/transactions", json=payload, timeout=5)
@@ -48,7 +65,6 @@ async def optimize(data: SymbiosisRequest):
         else:
             tx_hash = f"ERROR_{response.status_code}"
     except Exception:
-        # Fallback agar demo bisa jalan meskipun container Node mati
         tx_hash = "0x8f92a11b22e_MOCK_FALLBACK"
 
     return {
@@ -56,7 +72,7 @@ async def optimize(data: SymbiosisRequest):
         "material_type": data.material_type,
         "volume_kg": data.volume_kg,
         "system_outputs": {
-            "ml_purity_score": ml_purity_score,
+            "ml_purity_score": ml_score,
             "optimization_status": optimization_status,
             "blockchain_tx_hash": tx_hash,
             "optimization_details": milp_result

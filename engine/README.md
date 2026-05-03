@@ -39,3 +39,22 @@ Steel Slag  (Berisi gambar-gambar terak baja)
 
 **Immediate Next Step:**
 - (PIC B) Implementation of `gateway.js` and `symbiosis_contract.js` to ingest the new enriched payload from the Engine, executing legitimate chaincode transactions on the Hyperledger Microfab node (Port 8080).
+
+
+## Day 3 Trust Layer & Gateway Integration (May 3, 2026)
+
+**Completed Feature:**
+- Developed `train_offline.py` to generate synthetic tabular data (pH, moisture, volume) and train a `scikit-learn` Linear Regression model offline.
+- Implemented `engine/predictor.py` to load `symbio_model.pkl` and serve as the Machine Learning "Gatekeeper".
+- Updated `engine/main.py` `/optimize` endpoint: Incoming payloads are now evaluated by the ML model. If the predicted extraction purity is < 80%, the request is instantly `REJECTED`, bypassing the MILP algorithm to save compute and enforce strict ESG standards.
+- Resolved Docker internal networking issues, ensuring the FastAPI Engine successfully posts transactions to the Node.js Express Gateway at `http://symbio-link-blockchain:3000/transactions`.
+- Prepared the Computer Vision pipeline utilizing TensorFlow and MobileNetV2 Transfer Learning for automated waste classification (Fly Ash, Silica Fume, Steel Slag).
+
+**Files Modified:**
+- `engine/train_offline.py` (Created data generation & model training script)
+- `engine/predictor.py` (Created ML loading & prediction logic)
+- `engine/main.py` (Integrated ML Gatekeeper and fixed blockchain routing)
+- `docker-compose.yml` (Fixed network routing to port 3000)
+
+**Immediate Next Step:**
+- Finalize the Computer Vision `vision_model.h5` training in Google Colab and prepare the `/classify` API endpoint to ingest images before triggering `/optimize`.
