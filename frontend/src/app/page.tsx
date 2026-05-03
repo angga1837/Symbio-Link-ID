@@ -23,11 +23,12 @@ export default function Dashboard() {
     setResults((prev) => [newResult, ...prev]);
   };
 
+  // CO2 estimation formula as per Day 3: savings = volume * 0.4
   const chartData: EmissionPoint[] = results
     .map((r, idx) => ({
       name: `Tx ${(idx + 1).toString()}`,
       ml_purity: r.system_outputs?.ml_purity_score ?? 0.986,
-      co2_saved_kg: Math.round(r.volume_kg * 1.5),
+      co2_saved_kg: Math.round(r.volume_kg * 0.4),
     }))
     .reverse();
 

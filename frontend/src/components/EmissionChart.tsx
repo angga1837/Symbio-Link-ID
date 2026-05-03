@@ -2,8 +2,8 @@
 
 import React from "react";
 import {
-  Area,
-  AreaChart,
+  BarChart,
+  Bar,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -29,25 +29,17 @@ export default function EmissionChart({ data }: { data: EmissionPoint[] }) {
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
           <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 12 }} />
           <YAxis tick={{ fill: "#475569", fontSize: 12 }} />
           <Tooltip
-            cursor={{ stroke: "#94A3B8" }}
-            contentStyle={{ background: "#0F172A", borderRadius: 8, border: "none" }}
-            labelStyle={{ color: "#E2E8F0" }}
-            itemStyle={{ color: "#F8FAFC" }}
+            cursor={{ fill: "rgba(15,23,42,0.06)" }}
+            contentStyle={{ borderRadius: 8, border: "none" }}
+            itemStyle={{ color: "#0F172A" }}
           />
-          <Area
-            type="monotone"
-            dataKey="co2_saved_kg"
-            stroke="#0F766E"
-            fill="#0F766E"
-            fillOpacity={0.2}
-            name="CO2 Saved (kg)"
-          />
-        </AreaChart>
+          <Bar dataKey="co2_saved_kg" fill="#059669" name="CO2 Saved (kg)" radius={[6,6,0,0]} />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
