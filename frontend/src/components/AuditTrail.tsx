@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 
 interface AuditRow {
   sender_factory_id: string;
@@ -11,9 +13,33 @@ interface AuditRow {
   };
 }
 
-export default function AuditTrail({ rows }: { rows: AuditRow[] }) {
+export default function AuditTrail({ rows, refreshTrigger }: { rows: AuditRow[]; refreshTrigger?: number }) {
+  const [auditRows, setAuditRows] = useState<AuditRow[]>(rows);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchAuditTrail = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://localhost:8000/audit");
+        if (response.ok) {
+          const data = await response.json();
+          setAuditRows(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch audit trail:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAuditTrail();
+  }, [refreshTrigger]);
   return (
     <div className="overflow-x-auto">
+      {isLoading && (
+        <div className="mb-4 text-center text-sm text-slate-500">Fetching audit records...</div>
+      )}
       <table className="w-full text-left text-sm">
         <thead className="bg-slate-100 text-slate-600">
           <tr>
@@ -26,8 +52,8 @@ export default function AuditTrail({ rows }: { rows: AuditRow[] }) {
           </tr>
         </thead>
         <tbody>
-          {rows.length > 0 ? (
-            rows.map((row, idx) => (
+          {auditRows.length > 0 ? (
+            auditRows.map((row, idx) => (
               <tr key={`${row.sender_factory_id}-${idx}`} className="border-b border-slate-200">
                 <td className="px-3 py-3 font-medium text-slate-800">{row.sender_factory_id}</td>
                 <td className="px-3 py-3 text-slate-700">{row.material_type}</td>

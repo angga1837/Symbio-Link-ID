@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 import requests
 import os
 import logging

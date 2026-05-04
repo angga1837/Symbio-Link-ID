@@ -18,9 +18,12 @@ interface TransactionResult {
 
 export default function Dashboard() {
   const [results, setResults] = useState<TransactionResult[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleResult = (newResult: TransactionResult) => {
     setResults((prev) => [newResult, ...prev]);
+    // Trigger AuditTrail refresh by incrementing counter
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   // CO2 estimation formula as per Day 3: savings = volume * 0.4
@@ -36,7 +39,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_55%,#e2e8f0_100%)] p-8 text-slate-900">
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 border-b border-slate-200 pb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Day 2 Execution Console</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Day 4 Execution Console</p>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Symbio-Link ID Dashboard</h1>
           <p className="mt-2 text-slate-600">B2B Industrial Symbiosis Marketplace MVP</p>
         </header>
@@ -54,7 +57,7 @@ export default function Dashboard() {
 
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold text-slate-800">ESG Audit Trail</h2>
-              <AuditTrail rows={results} />
+              <AuditTrail rows={results} refreshTrigger={refreshTrigger} />
             </div>
           </div>
         </div>
