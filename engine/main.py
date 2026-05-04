@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 from optimizer import solve_symbiosis_milp
 from predictor import predict_quality
 from vision_predictor import predict_image
+from price import calculate_financials
 
 app = FastAPI(title="Symbio-Link ID Engine")
 
@@ -60,7 +61,7 @@ async def optimize(data: SymbiosisRequest):
             logger.warning(f"ML Rejection: Quality score {ml_score} below threshold.")
             return {
                 "status": "REJECTED",
-                "reason": "Limbah tidak memenuhi standar ekstraksi kritis (<80% purity score).",
+                "reason": "Limbah tidak memenuhi standar ekstraksi kritis (<60% purity score).",
                 "ml_purity_score": ml_score
             }
 
@@ -77,15 +78,26 @@ async def optimize(data: SymbiosisRequest):
                 "ml_purity_score": ml_score
             }
 
-        # Kalkulasi CO2 saved dari MILP
+        # Kalkulasi CO2 saved dan Biaya Logistik dari MILP
         co2_saved_kg = milp_result.get("co2_saved_kg", data.volume_kg * 0.45)
+        logistic_cost = milp_result.get("optimal_cost", 0)
+
+        # AI-Driven Pricing Layer
+        financials_data = calculate_financials(
+            material_type=data.material_type, 
+            volume_kg=data.volume_kg, 
+            ml_score=ml_score, 
+            logistic_cost=logistic_cost
+        )
 
         # Layer ngirim ke blockchain
         payload = data.model_dump()
         payload["optimal_routes"] = milp_result.get("routes", {})
-        payload["total_cost"] = milp_result.get("optimal_cost", 0)
+        payload["total_cost"] = logistic_cost
         payload["ml_purity_score"] = ml_score
         payload["co2_saved_kg"] = co2_saved_kg
+        payload["total_bill_to_buyer"] = financials_data["total_bill_to_buyer"]
+        payload["payment_status"] = "UNPAID"
         
         tx_hash = "PENDING"
         try:
@@ -107,7 +119,9 @@ async def optimize(data: SymbiosisRequest):
             "co2_saved_kg": co2_saved_kg,
             "ml_purity_score": ml_score,
             "blockchain_tx_hash": tx_hash,
-            "status": optimization_status
+            "status": optimization_status,
+            "payment_status": "UNPAID",
+            "total_bill_to_buyer": financials_data["total_bill_to_buyer"]
         }
         temp_audit_db.insert(0, audit_entry)
         
@@ -122,7 +136,8 @@ async def optimize(data: SymbiosisRequest):
                 "blockchain_tx_hash": tx_hash,
                 "co2_saved_kg": co2_saved_kg,
                 "optimization_details": milp_result
-            }
+            },
+            "financials": financials_data
         }
 
     except Exception as e:
