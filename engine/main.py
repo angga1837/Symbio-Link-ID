@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 import requests
 import os
 
@@ -18,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Audit ledger: stores all transactions for ESG tracking
+audit_ledger: List[dict] = []
 
 BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://symbio-link-blockchain:3000")
 
@@ -82,7 +85,7 @@ async def optimize(data: SymbiosisRequest):
     except Exception:
         tx_hash = "0x8f92a11b22e_MOCK_FALLBACK"
 
-    return {
+    result = {
         "sender_factory_id": data.sender_factory_id,
         "material_type": data.material_type,
         "volume_kg": data.volume_kg,
@@ -93,3 +96,14 @@ async def optimize(data: SymbiosisRequest):
             "optimization_details": milp_result
         }
     }
+    
+    # Record to audit ledger
+    audit_ledger.append(result)
+    
+    return result
+
+
+@app.get("/audit")
+async def get_audit_trail() -> List[dict]:
+    """Retrieve all audit trail entries (ESG transaction ledger)."""
+    return audit_ledger
