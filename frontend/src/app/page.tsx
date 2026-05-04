@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AuditTrail from "../components/AuditTrail";
-import EmissionChart, { EmissionPoint } from "../components/EmissionChart";
+import EmissionChart from "../components/EmissionChart";
 import WasteForm from "../components/WasteForm";
 
 interface TransactionResult {
@@ -26,14 +26,8 @@ export default function Dashboard() {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  // CO2 estimation formula as per Day 3: savings = volume * 0.4
-  const chartData: EmissionPoint[] = results
-    .map((r, idx) => ({
-      name: `Tx ${(idx + 1).toString()}`,
-      ml_purity: r.system_outputs?.ml_purity_score ?? 0.986,
-      co2_saved_kg: Math.round(r.volume_kg * 0.4),
-    }))
-    .reverse();
+  // results are passed directly to child components; CO2 calculations occur in EmissionChart
+
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_55%,#e2e8f0_100%)] p-8 text-slate-900">
