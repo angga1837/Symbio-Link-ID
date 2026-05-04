@@ -52,7 +52,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-8">
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold text-slate-800">CO2 Emission Reductions (kg)</h2>
-              <EmissionChart data={chartData} />
+              <EmissionChart auditData={results} />
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

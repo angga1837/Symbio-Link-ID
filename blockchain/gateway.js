@@ -35,14 +35,18 @@ app.get("/health", (_req, res) => {
 });
 
 app.get("/transactions", (_req, res) => {
+  console.log(`[ESG-LEDGER-NODE] FETCHING TRANSACTION HISTORY - total=${ledger.length}`);
   res.json({ total: ledger.length, items: ledger });
 });
 
 app.get("/transactions/:txHash", (req, res) => {
+  console.log(`[ESG-LEDGER-NODE] FETCHING TX ${req.params.txHash} FROM LEDGER`);
   const item = ledger.find((entry) => entry.blockchain_tx_hash === req.params.txHash);
   if (!item) {
+    console.log(`[ESG-LEDGER-NODE] TX ${req.params.txHash} NOT FOUND`);
     return res.status(404).json({ error: "Transaction not found" });
   }
+  console.log(`[ESG-LEDGER-NODE] TX ${req.params.txHash} RETURNED`);
   return res.json(item);
 });
 
@@ -60,7 +64,9 @@ app.post("/transactions", async (req, res) => {
   }
 
   try {
+    console.log("[ESG-LEDGER-NODE] SUBMITTING TX TO FABRIC...", normalized.sender_factory_id, normalized.material_type);
     const blockchainTxHash = await submitToFabric(normalized);
+    console.log(`[ESG-LEDGER] TX VERIFIED: ${blockchainTxHash}`);
     const entry = {
       ...normalized,
       blockchain_tx_hash: blockchainTxHash,
@@ -68,11 +74,13 @@ app.post("/transactions", async (req, res) => {
     };
 
     ledger.unshift(entry);
+    console.log(`[CRYPTOGRAPHY] GENERATING SHA-256 HASH... ${blockchainTxHash.slice(0,8)}...`);
     return res.status(201).json({
       status: "COMMITTED",
       blockchain_tx_hash: blockchainTxHash,
     });
   } catch (error) {
+    console.error("[ESG-LEDGER] COMMIT FAILED:", error.message || error);
     return res.status(500).json({
       error: "Failed to submit transaction to Fabric gateway",
       detail: error.message,
