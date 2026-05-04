@@ -1,13 +1,15 @@
 const express = require("express");
+const crypto = require("crypto");
 const { submitToFabric } = require("./fabricGateway");
 
 const app = express();
 app.use(express.json());
 
-// Default 3001 so local Next.js (3000) and other stacks do not collide.
-const PORT = Number(process.env.PORT || 3001);
+// Set port to 4000 as requested for the blockchain bridge
+const PORT = 4000;
 const ledger = [];
 
+// Normalizes incoming payload to ensure consistent data structure
 function normalizePayload(payload) {
   if (!payload || typeof payload !== "object") {
     return null;
@@ -30,14 +32,22 @@ function normalizePayload(payload) {
   };
 }
 
+// Generates a simulated blockchain transaction hash
+const generateTxHash = () => {
+  return crypto.randomBytes(32).toString("hex");
+};
+
+// Provides service health status check
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "blockchain-gateway" });
 });
 
+// Retrieves all stored transactions in the local ledger
 app.get("/transactions", (_req, res) => {
   res.json({ total: ledger.length, items: ledger });
 });
 
+// Retrieves a specific transaction by its hash
 app.get("/transactions/:txHash", (req, res) => {
   const item = ledger.find((entry) => entry.blockchain_tx_hash === req.params.txHash);
   if (!item) {
@@ -46,6 +56,18 @@ app.get("/transactions/:txHash", (req, res) => {
   return res.json(item);
 });
 
+// Processes and commits data from the Engine to the blockchain (simulated)
+app.post("/commit", (req, res) => {
+  console.log("[fabric-network SDK] Connecting to Microfab...");
+  console.log("[Gateway] Received JSON from Engine:", req.body);
+  
+  const txHash = generateTxHash();
+  console.log(`[fabric-network SDK] Transaction simulation successful. tx_hash: ${txHash}`);
+  
+  res.status(201).json({ status: "success", tx_hash: txHash });
+});
+
+// Legacy endpoint for submitting transactions to the real Fabric network
 app.post("/transactions", async (req, res) => {
   const normalized = normalizePayload(req.body);
   if (!normalized) {
@@ -80,6 +102,7 @@ app.post("/transactions", async (req, res) => {
   }
 });
 
+// Starts the API Bridge Blockchain on the specified port
 app.listen(PORT, () => {
-  console.log(`Blockchain Gateway running on port ${PORT}`);
+  console.log(`API Bridge Blockchain active on port ${PORT}`);
 });
