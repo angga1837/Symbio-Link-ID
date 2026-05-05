@@ -57,6 +57,7 @@ async def classify_material_image(file: UploadFile = File(...)):
 async def optimize(data: SymbiosisRequest):
     try:
         logger.info(f"Incoming payload from {data.sender_factory_id}: {data.material_type} ({data.volume_kg}kg)")
+        
         # Trust layer make ML regresi
         ml_score = predict_quality(data.ph_level, data.moisture, data.volume_kg)
 
