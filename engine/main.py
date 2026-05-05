@@ -12,11 +12,7 @@ logger = logging.getLogger(__name__)
 from optimizer import solve_symbiosis_milp
 from predictor import predict_quality
 from vision_predictor import predict_image
-import logging
-
-# Setup Terminal Logging ala Industrial
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [ENGINE] %(message)s')
-logger = logging.getLogger(__name__)
+from price import calculate_financials
 
 app = FastAPI(title="Symbio-Link ID Engine")
 
@@ -30,7 +26,7 @@ app.add_middleware(
 
 BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://blockchain:4000")
 
-# Untuk menyimpan data sambil nunggu /history
+# Untuk menyimpan data sambil nunggu /history 
 temp_audit_db = []
 
 class SymbiosisRequest(BaseModel):
@@ -65,7 +61,7 @@ async def optimize(data: SymbiosisRequest):
             logger.warning(f"ML Rejection: Quality score {ml_score} below threshold.")
             return {
                 "status": "REJECTED",
-                "reason": "Limbah tidak memenuhi standar ekstraksi kritis (<80% purity score).",
+                "reason": "Limbah tidak memenuhi standar ekstraksi kritis (<60% purity score).",
                 "ml_purity_score": ml_score
             }
 
@@ -82,15 +78,26 @@ async def optimize(data: SymbiosisRequest):
                 "ml_purity_score": ml_score
             }
 
-        # Kalkulasi CO2 saved dari MILP
+        # Kalkulasi CO2 saved dan Biaya Logistik dari MILP
         co2_saved_kg = milp_result.get("co2_saved_kg", data.volume_kg * 0.45)
+        logistic_cost = milp_result.get("optimal_cost", 0)
+
+        # AI-Driven Pricing Layer
+        financials_data = calculate_financials(
+            material_type=data.material_type, 
+            volume_kg=data.volume_kg, 
+            ml_score=ml_score, 
+            logistic_cost=logistic_cost
+        )
 
         # Layer ngirim ke blockchain
         payload = data.model_dump()
         payload["optimal_routes"] = milp_result.get("routes", {})
-        payload["total_cost"] = milp_result.get("optimal_cost", 0)
+        payload["total_cost"] = logistic_cost
         payload["ml_purity_score"] = ml_score
         payload["co2_saved_kg"] = co2_saved_kg
+        payload["total_bill_to_buyer"] = financials_data["total_bill_to_buyer"]
+        payload["payment_status"] = "UNPAID"
         
         tx_hash = "PENDING"
         try:
@@ -112,7 +119,9 @@ async def optimize(data: SymbiosisRequest):
             "co2_saved_kg": co2_saved_kg,
             "ml_purity_score": ml_score,
             "blockchain_tx_hash": tx_hash,
-            "status": optimization_status
+            "status": optimization_status,
+            "payment_status": "UNPAID",
+            "total_bill_to_buyer": financials_data["total_bill_to_buyer"]
         }
         temp_audit_db.insert(0, audit_entry)
         
@@ -127,7 +136,8 @@ async def optimize(data: SymbiosisRequest):
                 "blockchain_tx_hash": tx_hash,
                 "co2_saved_kg": co2_saved_kg,
                 "optimization_details": milp_result
-            }
+            },
+            "financials": financials_data
         }
 
     except Exception as e:
@@ -136,13 +146,41 @@ async def optimize(data: SymbiosisRequest):
 
 @app.get("/audit")
 async def get_audit_trail():
-    # nyoba tarik dari Blockchain /history. Nek gagal, berikan data sementara dari Engine.
+    formatted_data = []
+
+    # nyoba tarik dari blockchain
     try:
         response = requests.get(f"{BLOCKCHAIN_GATEWAY_URL}/history", timeout=2)
         if response.status_code == 200:
-            return response.json()
-        else:
-            # Endpoint belum ada jadi makai data engine
-            return {"total": len(temp_audit_db), "items": temp_audit_db, "source": "Engine Mock (Blockchain Not Ready)"}
+            # Blockchain mmeretuyrn { status: "...", data: [...] }
+            bc_data = response.json().get("data", [])
+            for item in bc_data:
+                formatted_data.append({
+                    "sender_factory_id": item.get("sender_factory_id", "Unknown"),
+                    "material_type": item.get("material_type", "Unknown"),
+                    "volume_kg": item.get("volume_kg", 0),
+                    "system_outputs": {
+                        "ml_purity_score": item.get("ml_purity_score"),
+                        "optimization_status": item.get("status", item.get("mode")),
+                        "blockchain_tx_hash": item.get("blockchain_tx_hash")
+                    }
+                })
+            return formatted_data
     except Exception as e:
-        return {"total": len(temp_audit_db), "items": temp_audit_db, "source": "Engine Mock (Connection Error)"}
+        logger.warning(f"Blockchain history fetch failed, using fallback: {str(e)}")
+
+    # 2. nek gagal, makai memori engine
+    for item in temp_audit_db:
+        formatted_data.append({
+            "sender_factory_id": item.get("sender_factory_id"),
+            "material_type": item.get("material_type"),
+            "volume_kg": item.get("volume_kg"),
+            "system_outputs": {
+                "ml_purity_score": item.get("ml_purity_score"),
+                "optimization_status": item.get("status"),
+                "blockchain_tx_hash": item.get("blockchain_tx_hash")
+            }
+        })
+    
+    # Kembalikan array murni agar Frontend bisa langsung melakukan mapping
+    return formatted_data

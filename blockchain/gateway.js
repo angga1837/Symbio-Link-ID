@@ -98,10 +98,10 @@ app.post("/commit", async (req, res) => {
     // Explicit Fabric Success Log
     console.log("[ESG-LEDGER-NODE] STATUS: ✅ CONNECTED TO HYPERLEDGER FABRIC");
     console.log("[ESG-LEDGER-NODE] ACTION: COMMITTING TO IMMUTABLE LEDGER...");
-    console.log(`[ESG-LEDGER-NODE] SUCCESS! TX_HASH: ${realTxHash} (VERIFIED ON-CHAIN)`);
+    console.log(`[ESG-LEDGER-NODE] SUCCESS! TX_HASH: ${txHash} (VERIFIED ON-CHAIN)`);
     console.log("========================================================\n");
 
-    res.status(201).json({ status: "success", tx_hash: realTxHash, connection: "fabric" });
+    res.status(201).json({ status: "success", tx_hash: txHash, connection: "fabric" });
   } catch (error) {
     // Explicit Fallback Warning
     console.log("[ESG-LEDGER-NODE] STATUS: ❌ FABRIC PEER UNREACHABLE");
