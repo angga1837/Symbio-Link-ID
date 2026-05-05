@@ -90,7 +90,10 @@ app.post("/commit", async (req, res) => {
       ...normalized,
       blockchain_tx_hash: txHash,
       committed_at: new Date().toISOString(),
-      mode: connectionType === "fabric" ? "fabric_peer_commit" : "safeguard_fallback"
+      mode: connectionType === "fabric" ? "fabric_peer_commit" : "safeguard_fallback",
+      // --- B2B Financial Parameters (Escrow Foundation) ---
+      total_bill_to_buyer: normalized.total_bill_to_buyer ?? null,
+      payment_status: "UNPAID"
     };
 
     transactionLedgerCache.push(entry);
@@ -112,7 +115,10 @@ app.post("/commit", async (req, res) => {
       ...normalized,
       blockchain_tx_hash: fallbackHash,
       committed_at: new Date().toISOString(),
-      mode: "safeguard_fallback"
+      mode: "safeguard_fallback",
+      // --- B2B Financial Parameters (Escrow Foundation) ---
+      total_bill_to_buyer: normalized.total_bill_to_buyer ?? null,
+      payment_status: "UNPAID"
     };
 
     transactionLedgerCache.push(entry);
