@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 from optimizer import solve_symbiosis_milp
 from predictor import predict_quality
 from vision_predictor import predict_image
+import logging
+
+# Setup Terminal Logging ala Industrial
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [ENGINE] %(message)s')
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Symbio-Link ID Engine")
 
