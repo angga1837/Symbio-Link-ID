@@ -11,34 +11,31 @@ import {
   YAxis,
 } from "recharts";
 
-export interface EmissionPoint {
-  name: string;
-  co2_saved_kg: number;
-  ml_purity: number;
-}
+export default function EmissionChart({ auditData }: { auditData?: any[] }) {
+  const chartData = (auditData ?? []).map((log, index) => ({
+    name: `TX-${index + 1}`,
+    co2_saved: (log.volume_kg ?? log.volume ?? 0) * 0.45,
+    material: log.material_type || log.material || "-",
+  }));
 
-export default function EmissionChart({ data }: { data: EmissionPoint[] }) {
-  if (data.length === 0) {
+  if (chartData.length === 0) {
     return (
-      <div className="flex h-64 w-full items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-400">
-        No emission data yet. Submit a material exchange to generate projections.
-      </div>
+      <div className="h-64 flex items-center justify-center text-slate-400">Menunggu data transaksi...</div>
     );
   }
 
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-          <XAxis dataKey="name" tick={{ fill: "#475569", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#475569", fontSize: 12 }} />
+        <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+          <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+          <YAxis fontSize={12} tickLine={false} axisLine={false} />
           <Tooltip
-            cursor={{ fill: "rgba(15,23,42,0.06)" }}
-            contentStyle={{ borderRadius: 8, border: "none" }}
-            itemStyle={{ color: "#0F172A" }}
+            cursor={{ fill: '#f1f5f9' }}
+            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
           />
-          <Bar dataKey="co2_saved_kg" fill="#059669" name="CO2 Saved (kg)" radius={[6,6,0,0]} />
+          <Bar dataKey="co2_saved" fill="#10b981" radius={[4, 4, 0, 0]} name="CO2 Saved (Kg)" />
         </BarChart>
       </ResponsiveContainer>
     </div>

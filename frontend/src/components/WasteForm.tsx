@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { toast } from "@/components/ui/toaster";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -63,8 +64,10 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
+        toast({ title: "Image detection failed", description: err.message, variant: "destructive" });
       } else {
         setError("Gagal menghubungi server ML");
+        toast({ title: "Image detection failed", description: "Gagal menghubungi server ML", variant: "destructive" });
       }
     } finally {
       setIdentifying(false);
@@ -92,13 +95,22 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
       });
 
       const result = await response.json();
-      onResult(result as OptimizationResult);
+      if (response.ok) {
+        onResult(result as OptimizationResult);
+        toast({ title: "Success", description: "Optimization completed and recorded.", variant: "success" });
+      } else {
+        const msg = result?.reason || result?.detail || "Optimization failed";
+        setError(msg);
+        toast({ title: "Optimization Error", description: msg, variant: "destructive" });
+      }
       
     } catch (err: unknown) {
         if (err instanceof Error) {
-            setError(err.message);
+          setError(err.message);
+          toast({ title: "Error", description: err.message, variant: "destructive" });
         } else {
-            setError("An unexpected error occurred or validation failed");
+          setError("An unexpected error occurred or validation failed");
+          toast({ title: "Error", description: "An unexpected error occurred or validation failed", variant: "destructive" });
         }
     } finally {
       setLoading(false);
