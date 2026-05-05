@@ -19,41 +19,24 @@ class SymbiosisContract extends Contract {
     };
 
     await ctx.stub.putState(txId, Buffer.from(JSON.stringify(record)));
-    return txId;
+    return JSON.stringify(record);
   }
 
-  async ReadTransaction(ctx, txId) {
-    const exists = await this.TransactionExists(ctx, txId);
-    if (!exists) {
-      throw new Error(`Transaction ${txId} does not exist`);
-    }
-
-    const data = await ctx.stub.getState(txId);
-    return data.toString();
-  }
-
-  async GetAllTransactions(ctx) {
-    const iterator = await ctx.stub.getStateByRange("", "");
-    const results = [];
-
-    while (true) {
-      const item = await iterator.next();
-      if (item.value && item.value.value) {
-        const raw = item.value.value.toString("utf8");
-        try {
-          results.push(JSON.parse(raw));
-        } catch {
-          results.push({ raw });
-        }
+  async QueryAllTransactions(ctx) {
+    const startKey = "";
+    const endKey = "";
+    const allResults = [];
+    for await (const { key, value } of ctx.stub.getStateByRange(startKey, endKey)) {
+      const strValue = Buffer.from(value).toString("utf8");
+      let record;
+      try {
+        record = JSON.parse(strValue);
+      } catch (err) {
+        record = strValue;
       }
-
-      if (item.done) {
-        await iterator.close();
-        break;
-      }
+      allResults.push({ Key: key, Record: record });
     }
-
-    return JSON.stringify(results);
+    return JSON.stringify(allResults);
   }
 }
 

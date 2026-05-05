@@ -59,3 +59,33 @@ Steel Slag  (Berisi gambar-gambar terak baja)
 **Immediate Next Step:**
 - UI/UX polish on the Frontend (`WasteForm.tsx`) to ensure smooth loading states during image classification and MILP optimization.
 - Live-test the complete end-to-end flow: Image Upload -> CV Classification -> ML Gatekeeper -> MILP Optimization -> Blockchain Ledger.
+
+
+## Day 4 Ledger Query & UI Synchronization (May 4, 2026)
+
+**Completed Feature:**
+- **[ESG Metrics]** Refined the MILP optimization payload to calculate and return estimated Carbon Emission savings (`co2_saved_kg`), assuming 0.45 Kg CO2 saved per Kg of waste processed. This equips the UI with critical data for ESG charts.
+- **[API Proxy & Mock Ledger]** Built a `GET /audit` endpoint in the FastAPI Engine to proxy requests to the Blockchain Gateway. 
+- **[Frontend Unblocker]** Engineered an intelligent fallback mechanism: an in-memory mock database (`temp_audit_db`) that temporarily stores and serves transaction history. This allows the Frontend team to finalize the `AuditTrail.tsx` component simultaneously while the Blockchain Gateway's ledger logic is being finalized.
+
+**Files Modified:**
+- `engine/main.py` (Added `/audit` endpoint, integrated mock database, updated `/optimize` returns)
+- `engine/optimizer.py` (Added CO2 savings mathematical logic)
+
+**Immediate Next Step:**
+- (Frontend) Connect `AuditTrail.tsx` to `http://localhost:8000/audit` using `useEffect` to automatically render the transaction history and trigger a re-fetch upon successful form submission.
+- (Blockchain) Finalize the `GET /history` endpoint in `gateway.js` so the Engine can seamlessly switch from the in-memory mock to the genuine Hyperledger Fabric ledger.
+
+## Day 5 The Great Integration & System Resilience (May 4, 2026)
+
+**Completed Feature:**
+- **[Industrial Logging]** Integrated Python's native `logging` module to output structured, color-coded terminal logs (`INFO`, `WARNING`, `ERROR`). This drastically improves container monitoring and debugging capabilities.
+- **[Graceful Degradation]** Engineered a robust fallback mechanism for the Blockchain Gateway integration. The POST `/optimize` endpoint now handles `requests` timeouts and connection errors seamlessly, returning a mock `FALLBACK_CACHE_HASH_0x1` to prevent the Frontend UI from freezing during live demo catastrophes.
+- **[Robust Error Handling]** Wrapped core ML and MILP execution pipelines in strict `try-except` blocks. Critical failures now return a clean HTTP 500 status code with an explicit JSON error detail, rather than crashing the FastAPI server.
+
+**Files Modified:**
+- `engine/main.py` (Added logging, try-except wrappers, and API resilience logic)
+
+**Immediate Next Step:**
+- (Frontend) Implement UI polish, such as Toast Notifications (Shadcn) to give users instant, enterprise-grade feedback on error/success states.
+- (Frontend) Finalize the integration of `recharts` to render the Carbon Emission (`co2_saved_kg`) data beautifully on the Dashboard.

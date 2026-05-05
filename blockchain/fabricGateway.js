@@ -53,8 +53,9 @@ async function tryFabricSubmit(transaction) {
     await gateway.connect(ccp, {
       wallet,
       identity,
-      discovery: { enabled: true, asLocalhost: true },
+      discovery: { enabled: false, asLocalhost: true },
     });
+
 
     const network = await gateway.getNetwork(channelName);
     const contract = network.getContract(chaincodeName);
