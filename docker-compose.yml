@@ -5,7 +5,7 @@ services:
     ports:
       - '8000:8000'
     environment:
-      - BLOCKCHAIN_URL=http://blockchain:3000 
+      - BLOCKCHAIN_URL=http://blockchain:4000 
     depends_on:
       - blockchain
     networks:
@@ -28,7 +28,7 @@ services:
       context: ./blockchain
     container_name: symbio-link-blockchain
     ports:
-      - '3000:3000' 
+      - '4000:4000' 
     networks:
       - symbio-net
 

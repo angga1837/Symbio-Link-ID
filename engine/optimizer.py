@@ -2,23 +2,22 @@ import pulp
 
 def solve_symbiosis_milp(sender_id: str, volume_kg: float):
 
-    # mcok data
+    # mock data
     destinations = ["PT_Semen_B", "PT_Beton_C"]
     
     supply_data = {sender_id: volume_kg}
     
-    #mockdata
+    # mock data demand
     demand_data = {
         "PT_Semen_B": volume_kg * 0.6,
         "PT_Beton_C": volume_kg * 0.4
     }
     
     # Mock Cost Matrix
-    # Biaya per kg berdasarkan jarak imajiner
     cost_matrix = {
         sender_id: {
-            "PT_Semen_B": 15.0,  # Misal 15 km
-            "PT_Beton_C": 25.0   # Misal 25 km
+            "PT_Semen_B": 15.0,
+            "PT_Beton_C": 25.0
         }
     }
 
@@ -37,7 +36,7 @@ def solve_symbiosis_milp(sender_id: str, volume_kg: float):
     prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
     if pulp.LpStatus[prob.status] != 'Optimal':
-        return {"status": "INFEASIBLE", "optimal_cost": None, "routes": {}}
+        return {"status": "INFEASIBLE", "optimal_cost": None, "routes": {}, "co2_saved_kg": 0}
 
     optimal_routes = {}
     for i in sources:
@@ -46,8 +45,11 @@ def solve_symbiosis_milp(sender_id: str, volume_kg: float):
             if vol and vol > 0:
                 optimal_routes[f"{i}->{j}"] = vol
 
+    co2_saved_kg = volume_kg * 0.45
+
     return {
         "status": "OPTIMAL",
         "optimal_cost": pulp.value(prob.objective),
-        "routes": optimal_routes
+        "routes": optimal_routes,
+        "co2_saved_kg": co2_saved_kg
     }
