@@ -26,7 +26,7 @@ app.add_middleware(
 
 BLOCKCHAIN_GATEWAY_URL = os.getenv("BLOCKCHAIN_URL", "http://blockchain:4000")
 
-# Untuk menyimpan data sambil nunggu /history
+# Untuk menyimpan data sambil nunggu /history 
 temp_audit_db = []
 
 class SymbiosisRequest(BaseModel):
@@ -146,13 +146,41 @@ async def optimize(data: SymbiosisRequest):
 
 @app.get("/audit")
 async def get_audit_trail():
-    # nyoba tarik dari Blockchain /history. Nek gagal, berikan data sementara dari Engine.
+    formatted_data = []
+
+    # nyoba tarik dari blockchain
     try:
         response = requests.get(f"{BLOCKCHAIN_GATEWAY_URL}/history", timeout=2)
         if response.status_code == 200:
-            return response.json()
-        else:
-            # Endpoint belum ada jadi makai data engine
-            return {"total": len(temp_audit_db), "items": temp_audit_db, "source": "Engine Mock (Blockchain Not Ready)"}
+            # Blockchain mmeretuyrn { status: "...", data: [...] }
+            bc_data = response.json().get("data", [])
+            for item in bc_data:
+                formatted_data.append({
+                    "sender_factory_id": item.get("sender_factory_id", "Unknown"),
+                    "material_type": item.get("material_type", "Unknown"),
+                    "volume_kg": item.get("volume_kg", 0),
+                    "system_outputs": {
+                        "ml_purity_score": item.get("ml_purity_score"),
+                        "optimization_status": item.get("status", item.get("mode")),
+                        "blockchain_tx_hash": item.get("blockchain_tx_hash")
+                    }
+                })
+            return formatted_data
     except Exception as e:
-        return {"total": len(temp_audit_db), "items": temp_audit_db, "source": "Engine Mock (Connection Error)"}
+        logger.warning(f"Blockchain history fetch failed, using fallback: {str(e)}")
+
+    # 2. nek gagal, makai memori engine
+    for item in temp_audit_db:
+        formatted_data.append({
+            "sender_factory_id": item.get("sender_factory_id"),
+            "material_type": item.get("material_type"),
+            "volume_kg": item.get("volume_kg"),
+            "system_outputs": {
+                "ml_purity_score": item.get("ml_purity_score"),
+                "optimization_status": item.get("status"),
+                "blockchain_tx_hash": item.get("blockchain_tx_hash")
+            }
+        })
+    
+    # Kembalikan array murni agar Frontend bisa langsung melakukan mapping
+    return formatted_data

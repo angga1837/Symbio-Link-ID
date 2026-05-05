@@ -11,7 +11,14 @@ import {
   YAxis,
 } from "recharts";
 
-export default function EmissionChart({ auditData }: { auditData?: any[] }) {
+interface AuditLog {
+  volume_kg?: number;
+  volume?: number;
+  material_type?: string;
+  material?: string;
+}
+
+export default function EmissionChart({ auditData }: { auditData?: AuditLog[] }) {
   const chartData = (auditData ?? []).map((log, index) => ({
     name: `TX-${index + 1}`,
     co2_saved: (log.volume_kg ?? log.volume ?? 0) * 0.45,

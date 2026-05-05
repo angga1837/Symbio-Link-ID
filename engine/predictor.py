@@ -13,7 +13,7 @@ except FileNotFoundError:
 def predict_quality(ph: float, moisture: float, volume_kg: float) -> float:
     """
     Memprediksi efisiensi ekstraksi material kritis menggunakan model offline.
-    Return: float antara 0.0 hingga 0.986 (98.6%)
+    Return: float antara 0.0 hingga 1 (100%)
     """
     if ai_model is None:
         return 0.85 
@@ -22,5 +22,5 @@ def predict_quality(ph: float, moisture: float, volume_kg: float) -> float:
     prediction = ai_model.predict(features)[0]
     
     # Batas hingga 98.6% 
-    final_score = min(max(float(prediction), 0.0), 0.986)
+    final_score = min(max(float(prediction), 0.0), 1)
     return round(final_score, 3)
