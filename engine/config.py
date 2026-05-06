@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     # CO2 factor (kg CO2 saved per kg material diverted)
     CO2_FACTOR: float = 0.45
 
+    # Mock data seeding
+    SEED_MOCK_DATA: bool = False
+    SEED_MOCK_FORCE: bool = False
+
     class Config:
         env_file = ".env"
 

@@ -32,6 +32,8 @@ services:
       - ML_PURITY_THRESHOLD=0.60
       - CO2_FACTOR=0.45
       - BLOCKCHAIN_MODE=auto
+      - SEED_MOCK_DATA=true
+      - SEED_MOCK_FORCE=false
     depends_on:
       postgres:
         condition: service_healthy

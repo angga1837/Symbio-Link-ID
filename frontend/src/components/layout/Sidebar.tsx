@@ -52,6 +52,8 @@ const navSections = [
   },
 ];
 
+import MockAccountSwitcher from "@/components/layout/MockAccountSwitcher";
+
 export default function Sidebar() {
   const pathname = usePathname();
 
@@ -108,8 +110,9 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t border-slate-700/50 p-3">
+      {/* Bottom Actions */}
+      <div className="border-t border-slate-700/50 p-3 space-y-2">
+        <MockAccountSwitcher />
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"

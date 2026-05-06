@@ -22,6 +22,8 @@ from routers._legacy import router as legacy_router
 
 # ── DB lifespan: create tables on startup ─────────────────────────
 from database import engine as db_engine, Base
+from config import get_settings
+from seed_mock import seed_data
 import models  # noqa: F401 — triggers all ORM model imports so Base.metadata is populated
 
 
@@ -31,6 +33,13 @@ async def lifespan(app: FastAPI):
     async with db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables initialised.")
+    settings = get_settings()
+    if settings.SEED_MOCK_DATA:
+        try:
+            await seed_data(force=settings.SEED_MOCK_FORCE)
+            logger.info("Mock data seed completed.")
+        except Exception as exc:
+            logger.error("Mock data seed failed: %s", exc)
     yield
 
 
