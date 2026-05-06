@@ -30,8 +30,8 @@ export default function FacilitiesPage() {
       await api.post("/api/v1/facilities/", {
         name: form.name,
         address: form.address || undefined,
-        latitude: parseFloat(form.latitude),
-        longitude: parseFloat(form.longitude),
+        latitude: parseFloat(form.latitude) || 0,
+        longitude: parseFloat(form.longitude) || 0,
         facility_type: form.facility_type,
         capacity_kg: form.capacity_kg ? parseFloat(form.capacity_kg) : 0,
       });
@@ -71,27 +71,27 @@ export default function FacilitiesPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="block text-sm font-medium text-slate-700">Name</label>
-              <input type="text" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm"
+              <input type="text" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Pabrik Utama" />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-slate-700">Address</label>
-              <input type="text" className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm"
+              <input type="text" className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Jl. Industri No. 1, Surabaya" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Latitude</label>
-              <input type="number" step="any" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm"
+              <input type="number" step="any" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} placeholder="-7.2575" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Longitude</label>
-              <input type="number" step="any" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm"
+              <input type="number" step="any" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} placeholder="112.7521" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Type</label>
-              <select className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm bg-white"
+              <select className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white"
                 value={form.facility_type} onChange={(e) => setForm({ ...form, facility_type: e.target.value })}>
                 <option value="factory">Factory</option>
                 <option value="warehouse">Warehouse</option>
@@ -101,7 +101,7 @@ export default function FacilitiesPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Capacity (kg)</label>
-              <input type="number" className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm"
+              <input type="number" className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.capacity_kg} onChange={(e) => setForm({ ...form, capacity_kg: e.target.value })} placeholder="10000" />
             </div>
           </div>

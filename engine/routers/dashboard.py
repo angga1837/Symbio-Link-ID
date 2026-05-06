@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from uuid import UUID
 from database import get_db
 from middleware.auth import get_current_user
@@ -53,8 +53,8 @@ async def get_executive_dashboard(
             func.sum(ESGRecord.value).label("total"),
         )
         .where(ESGRecord.org_id == org_id, ESGRecord.record_type == "co2_offset")
-        .group_by(func.date_trunc("month", ESGRecord.created_at))
-        .order_by(func.date_trunc("month", ESGRecord.created_at))
+        .group_by(text("month"))
+        .order_by(text("month"))
     )
     monthly_result = await db.execute(monthly_query)
     monthly_trend = [

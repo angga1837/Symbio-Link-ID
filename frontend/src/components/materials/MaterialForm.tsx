@@ -199,7 +199,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
 
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1">Facility</label>
-        <select className="w-full p-2.5 border border-slate-300 rounded-lg bg-white"
+        <select className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
           value={form.facility_id} onChange={(e) => updateField("facility_id", e.target.value)} required>
           <option value="">Select facility...</option>
           {facilities.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
@@ -208,7 +208,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
 
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1">Material Type</label>
-        <input type="text" className="w-full p-2.5 border border-slate-300 rounded-lg"
+        <input type="text" className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder:text-slate-400"
           value={form.material_type} onChange={(e) => updateField("material_type", e.target.value)}
           placeholder="e.g., Copper Sludge, Fly Ash, Steel Slag" required />
         {classifiedAs && form.material_type === classifiedAs && (
@@ -220,7 +220,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
 
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-        <textarea className="w-full p-2.5 border border-slate-300 rounded-lg text-sm" rows={2}
+        <textarea className="w-full p-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400" rows={2}
           value={form.description} onChange={(e) => updateField("description", e.target.value)}
           placeholder="Detailed description of waste material..." />
       </div>
@@ -228,13 +228,13 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Volume (kg)</label>
-          <input type="number" className="w-full p-2.5 border border-slate-300 rounded-lg"
+          <input type="number" className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder:text-slate-400"
             value={form.volume_kg} onChange={(e) => updateField("volume_kg", e.target.value)}
             placeholder="500" min="0.1" step="0.1" required />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Supply Mode</label>
-          <select className="w-full p-2.5 border border-slate-300 rounded-lg bg-white"
+          <select className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
             value={form.supply_mode} onChange={(e) => updateField("supply_mode", e.target.value)}>
             <option value="batch">Batch</option>
             <option value="continuous">Continuous</option>
@@ -248,19 +248,19 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">pH Level (0–14)</label>
-            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"
               value={form.ph_level} onChange={(e) => updateField("ph_level", e.target.value)}
               placeholder="7.0" min="0" max="14" step="0.1" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Moisture (%)</label>
-            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"
               value={form.moisture_pct} onChange={(e) => updateField("moisture_pct", e.target.value)}
               placeholder="10" min="0" max="100" step="0.1" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Toxicity Class</label>
-            <select className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+            <select className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white"
               value={form.toxicity_class} onChange={(e) => updateField("toxicity_class", e.target.value)}>
               <option value="non_toxic">Non-toxic</option>
               <option value="low">Low</option>
@@ -271,26 +271,26 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Carbon (%)</label>
-            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"
               value={form.carbon_pct} onChange={(e) => updateField("carbon_pct", e.target.value)}
               placeholder="35.0" min="0" max="100" step="0.1" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Hydrogen (%)</label>
-            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"
               value={form.hydrogen_pct} onChange={(e) => updateField("hydrogen_pct", e.target.value)}
               placeholder="5.0" min="0" max="100" step="0.1" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Ash Content (%)</label>
-            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+            <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"
               value={form.ash_pct} onChange={(e) => updateField("ash_pct", e.target.value)}
               placeholder="15.0" min="0" max="100" step="0.1" />
           </div>
         </div>
         <div className="mt-3">
           <label className="block text-xs font-medium text-slate-600 mb-1">Additional Composition (JSON — optional)</label>
-          <input type="text" className="w-full p-2 border border-slate-300 rounded-lg text-sm font-mono"
+          <input type="text" className="w-full p-2 border border-slate-300 rounded-lg text-sm font-mono text-slate-900 bg-white placeholder:text-slate-400"
             value={form.chemical_composition} onChange={(e) => updateField("chemical_composition", e.target.value)}
             placeholder='{"Cu": 34.2, "Fe": 12.1, "SiO2": 8.5}' />
         </div>
