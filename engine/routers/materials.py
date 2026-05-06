@@ -58,8 +58,13 @@ async def classify_image(file: UploadFile = File(...), user: User = Depends(get_
         raise HTTPException(status_code=400, detail="No file uploaded")
     image_bytes = await file.read()
     predicted = predict_image(image_bytes)
-    if predicted in ["Gagal Identifikasi", "Model Tidak Tersedia"]:
-        raise HTTPException(status_code=500, detail=predicted)
+    
+    if predicted in ["Gagal Identifikasi", "Model Tidak Tersedia", "Gambar Tidak Dikenali"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Gambar bukan material yang terdaftar AI sistem atau terdapat lebih dari 1 material. Silahkan foto satu persatu atau mengambil gambar lain"
+        )
+        
     return {"predicted_material": predicted}
 
 

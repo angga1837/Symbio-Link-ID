@@ -58,10 +58,24 @@ def predict_image(image_bytes: bytes) -> str:
         img_array = np.expand_dims(img_array, axis=0)
         img_array = preprocess_input(img_array)
         
+        #memprediksi peluang dari model
         predictions = vision_model.predict(img_array)
-        predicted_class_index = np.argmax(predictions[0])
+        probabilities = predictions[0]
         
+        # Cari index dengan nilai tertinggi
+        predicted_class_index = np.argmax(probabilities)
+
+        confidence_score = probabilities[predicted_class_index]
+        
+        THRESHOLD = 0.80
+        
+        print(f"Prediksi Index: {predicted_class_index}, Skor: {confidence_score:.2f}")
+        
+        if confidence_score < THRESHOLD:
+            return "Gambar Tidak Dikenali"
+            
         return CLASS_NAMES[predicted_class_index]
+        
     except Exception as e:
         print(f"Error saat memproses gambar: {e}")
         return "Gagal Identifikasi"
