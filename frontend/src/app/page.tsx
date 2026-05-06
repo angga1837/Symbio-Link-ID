@@ -1,60 +1,33 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import AuditTrail from "../components/AuditTrail";
-import EmissionChart from "../components/EmissionChart";
-import WasteForm from "../components/WasteForm";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/lib/auth";
 
-interface TransactionResult {
-  sender_factory_id: string;
-  material_type: string;
-  volume_kg: number;
-  system_outputs?: {
-    ml_purity_score?: number;
-    optimization_status?: string;
-    blockchain_tx_hash?: string;
-  };
-}
+/**
+ * Root page — immediately redirects to /dashboard (if logged in) or /login.
+ * This replaces the legacy WasteForm homepage.
+ */
+export default function RootPage() {
+  const router = useRouter();
 
-export default function Dashboard() {
-  const [results, setResults] = useState<TransactionResult[]>([]);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-  const handleResult = (newResult: TransactionResult) => {
-    setResults((prev) => [newResult, ...prev]);
-    // Trigger AuditTrail refresh by incrementing counter
-    setRefreshTrigger((prev) => prev + 1);
-  };
-
-  // results are passed directly to child components; CO2 calculations occur in EmissionChart
-
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.replace("/dashboard");
+    } else {
+      router.replace("/login");
+    }
+  }, [router]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_55%,#e2e8f0_100%)] p-8 text-slate-900">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-8 border-b border-slate-200 pb-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Day 4 Execution Console</p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Symbio-Link ID Dashboard</h1>
-          <p className="mt-2 text-slate-600">B2B Industrial Symbiosis Marketplace MVP</p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <WasteForm onResult={handleResult} />
-          </div>
-
-          <div className="lg:col-span-2 space-y-8">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-slate-800">CO2 Emission Reductions (kg)</h2>
-              <EmissionChart auditData={results} />
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-slate-800">ESG Audit Trail</h2>
-              <AuditTrail rows={results} refreshTrigger={refreshTrigger} />
-            </div>
-          </div>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 to-emerald-950">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-12 w-12 rounded-xl bg-emerald-500 flex items-center justify-center animate-pulse">
+          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
         </div>
+        <p className="text-slate-400 text-sm">Loading Symbio-Link ID...</p>
       </div>
     </div>
   );

@@ -1,37 +1,72 @@
 services:
-  engine:
-    build: 
-      context: ./engine
-    ports:
-      - '8000:8000'
+  postgres:
+    image: postgres:16-alpine
+    container_name: symbio-postgres
     environment:
-      - BLOCKCHAIN_URL=http://blockchain:4000 
-    depends_on:
-      - blockchain
+      POSTGRES_DB: symbio_enterprise
+      POSTGRES_USER: symbio
+      POSTGRES_PASSWORD: symbio_enterprise_2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - symbio-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U symbio -d symbio_enterprise"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  engine:
+    build:
+      context: ./engine
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://symbio:symbio_enterprise_2026@postgres:5432/symbio_enterprise
+      - BLOCKCHAIN_URL=http://blockchain:4000
+      - JWT_SECRET=symbio_jwt_secret_production_2026
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRY_MINUTES=480
+      - ML_PURITY_THRESHOLD=0.60
+      - CO2_FACTOR=0.45
+      - BLOCKCHAIN_MODE=auto
+    depends_on:
+      postgres:
+        condition: service_healthy
+      blockchain:
+        condition: service_started
+    networks:
+      - symbio-net
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
     ports:
-      - '3001:3000' 
+      - "3001:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://engine:8000 
+      - NEXT_PUBLIC_API_URL=http://engine:8000
     depends_on:
       - engine
     networks:
       - symbio-net
 
   blockchain:
-    build: 
+    build:
       context: ./blockchain
     container_name: symbio-link-blockchain
     ports:
-      - '4000:4000' 
+      - "4000:4000"
+    environment:
+      - BLOCKCHAIN_MODE=auto
     networks:
       - symbio-net
 
 networks:
   symbio-net:
     driver: bridge
+
+volumes:
+  postgres_data:

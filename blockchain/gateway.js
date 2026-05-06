@@ -6,71 +6,49 @@ const { submitToFabric } = require("./fabricGateway");
 const app = express();
 app.use(express.json());
 
-// Set port to 4000 as requested for the blockchain bridge
 const PORT = 4000;
 const ledger = [];
-// In-memory safeguard replica for MVP Hackathon Demo
 let transactionLedgerCache = [];
 
-// Normalizes incoming payload to ensure consistent data structure
-function normalizePayload(payload) {
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
+// ── Helpers ──────────────────────────────────────────────────────────
 
+function normalizePayload(payload) {
+  if (!payload || typeof payload !== "object") return null;
   const senderFactoryId = payload.sender_factory_id || payload.Perusahaan || payload.sender;
   const materialType = payload.material_type || payload.Bahan;
   const volumeRaw = payload.volume_kg ?? payload.volume;
   const volumeKg = Number(volumeRaw);
-
-  if (!senderFactoryId || !materialType || Number.isNaN(volumeKg) || volumeKg <= 0) {
-    return null;
-  }
-
-  return {
-    ...payload,
-    sender_factory_id: senderFactoryId,
-    material_type: materialType,
-    volume_kg: volumeKg,
-  };
+  if (!senderFactoryId || !materialType || Number.isNaN(volumeKg) || volumeKg <= 0) return null;
+  return { ...payload, sender_factory_id: senderFactoryId, material_type: materialType, volume_kg: volumeKg };
 }
 
-// Generates a simulated blockchain transaction hash
 const generateTxHash = () => {
   console.log("[CRYPTOGRAPHY] GENERATING SHA-256 HASH...");
   return crypto.randomBytes(32).toString("hex");
 };
 
-// Provides service health status check
+// ── Routes ────────────────────────────────────────────────────────────
+
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "blockchain-gateway" });
+  res.json({ status: "ok", service: "blockchain-gateway", mode: process.env.BLOCKCHAIN_MODE || "auto" });
 });
 
-// Retrieves all stored transactions in the local ledger
 app.get("/transactions", (_req, res) => {
-  console.log(`[ESG-LEDGER-NODE] FETCHING TRANSACTION HISTORY - total=${ledger.length}`);
   res.json({ total: ledger.length, items: ledger });
 });
 
-// Retrieves a specific transaction by its hash
 app.get("/transactions/:txHash", (req, res) => {
-  console.log(`[ESG-LEDGER-NODE] FETCHING TX ${req.params.txHash} FROM LEDGER`);
-  const item = ledger.find((entry) => entry.blockchain_tx_hash === req.params.txHash);
-  if (!item) {
-    console.log(`[ESG-LEDGER-NODE] TX ${req.params.txHash} NOT FOUND`);
-    return res.status(404).json({ error: "Transaction not found" });
-  }
-  console.log(`[ESG-LEDGER-NODE] TX ${req.params.txHash} RETURNED`);
+  const item = ledger.find((e) => e.blockchain_tx_hash === req.params.txHash);
+  if (!item) return res.status(404).json({ error: "Transaction not found" });
   return res.json(item);
 });
 
-// Processes and commits data from the Engine to the blockchain (Dual-Write Strategy)
+// POST /commit — primary ingestion from Engine
 app.post("/commit", async (req, res) => {
   console.log("\n========================================================");
   console.log("[ESG-LEDGER-NODE] INCOMING TRANSACTION DETECTED");
 
   const normalized = normalizePayload(req.body) || req.body;
-
   const mode = (process.env.BLOCKCHAIN_MODE || "auto").toLowerCase();
 
   try {
@@ -80,66 +58,107 @@ app.post("/commit", async (req, res) => {
     if (mode === "fabric") {
       console.log("[fabric-network SDK] ATTEMPTING CONNECTION TO PEER...");
       txHash = await submitToFabric(normalized);
-      connectionType = "fabric";
+      connectionType = "fabric_peer_commit";
     } else {
       txHash = generateTxHash();
-      connectionType = "local_safeguard";
+      connectionType = "safeguard_fallback";
     }
 
     const entry = {
       ...normalized,
       blockchain_tx_hash: txHash,
       committed_at: new Date().toISOString(),
-      mode: connectionType === "fabric" ? "fabric_peer_commit" : "safeguard_fallback"
+      mode: connectionType,
+      record_type: "symbiosis_tx",
     };
 
     transactionLedgerCache.push(entry);
 
-    // Explicit Fabric Success Log
-    console.log("[ESG-LEDGER-NODE] STATUS: ✅ CONNECTED TO HYPERLEDGER FABRIC");
-    console.log("[ESG-LEDGER-NODE] ACTION: COMMITTING TO IMMUTABLE LEDGER...");
-    console.log(`[ESG-LEDGER-NODE] SUCCESS! TX_HASH: ${realTxHash} (VERIFIED ON-CHAIN)`);
+    console.log(`[ESG-LEDGER-NODE] SUCCESS! TX_HASH: ${txHash} (${connectionType.toUpperCase()})`);
     console.log("========================================================\n");
 
-    res.status(201).json({ status: "success", tx_hash: realTxHash, connection: "fabric" });
+    res.status(201).json({ status: "success", tx_hash: txHash, connection: connectionType });
   } catch (error) {
-    // Explicit Fallback Warning
-    console.log("[ESG-LEDGER-NODE] STATUS: ❌ FABRIC PEER UNREACHABLE");
-    console.log("[ESG-LEDGER-NODE] ACTION: ACTIVATING SAFEGUARD FAILOVER MODE...");
-
+    console.log("[ESG-LEDGER-NODE] STATUS: ❌ FABRIC PEER UNREACHABLE — ACTIVATING SAFEGUARD...");
     const fallbackHash = generateTxHash();
     const entry = {
       ...normalized,
       blockchain_tx_hash: fallbackHash,
       committed_at: new Date().toISOString(),
-      mode: "safeguard_fallback"
+      mode: "safeguard_fallback",
+      record_type: "symbiosis_tx",
     };
-
     transactionLedgerCache.push(entry);
-
-    console.log(`[ESG-LEDGER-NODE] SUCCESS! TX_HASH: ${fallbackHash} (LOCAL SAFEGUARD)`);
+    console.log(`[ESG-LEDGER-NODE] SAFEGUARD TX_HASH: ${fallbackHash}`);
     console.log("========================================================\n");
-
     res.status(201).json({ status: "success", tx_hash: fallbackHash, connection: "local_safeguard" });
   }
 });
 
-// Reads the blockchain replica history for demonstration
-app.get("/history", (req, res) => {
-  console.log("\n========================================================");
-  console.log("[ESG-LEDGER-NODE] QUERY REQUEST DETECTED: /history");
-  console.log("[ESG-LEDGER-NODE] FETCHING BLOCKS FROM MICROFAB NETWORK...");
-  console.log(`[ESG-LEDGER-NODE] SUCCESSFULLY RETRIEVED ${transactionLedgerCache.length} RECORD(S)`);
-  console.log("========================================================\n");
+// POST /shipment-status — called by engine blockchain_service.commit_shipment_status
+app.post("/shipment-status", (req, res) => {
+  const { shipment_id, status, metadata } = req.body;
+  if (!shipment_id || !status) {
+    return res.status(400).json({ error: "shipment_id and status are required" });
+  }
+  const txHash = generateTxHash();
+  const entry = {
+    record_type: "shipment_status",
+    shipment_id,
+    status,
+    metadata: metadata || {},
+    blockchain_tx_hash: txHash,
+    committed_at: new Date().toISOString(),
+    mode: "safeguard_fallback",
+  };
+  transactionLedgerCache.push(entry);
+  console.log(`[ESG-LEDGER-NODE] SHIPMENT STATUS: ${shipment_id} → ${status} | TX: ${txHash}`);
+  res.status(201).json({ status: "success", tx_hash: txHash });
+});
 
+// POST /certificates — called by engine blockchain_service.commit_certificate
+app.post("/certificates", (req, res) => {
+  const certData = req.body;
+  if (!certData || !certData.certificate_number) {
+    return res.status(400).json({ error: "certificate_number is required" });
+  }
+  const txHash = generateTxHash();
+  const entry = {
+    record_type: "green_certificate",
+    ...certData,
+    blockchain_tx_hash: txHash,
+    committed_at: new Date().toISOString(),
+    mode: "safeguard_fallback",
+  };
+  transactionLedgerCache.push(entry);
+  console.log(`[ESG-LEDGER-NODE] GREEN CERTIFICATE: ${certData.certificate_number} | TX: ${txHash}`);
+  res.status(201).json({ status: "success", tx_hash: txHash });
+});
+
+// GET /history — used by Engine /audit endpoint
+app.get("/history", (_req, res) => {
+  console.log(`[ESG-LEDGER-NODE] /history — ${transactionLedgerCache.length} records`);
   res.status(200).json({
     status: "success",
     total_records: transactionLedgerCache.length,
-    data: transactionLedgerCache
+    data: transactionLedgerCache,
   });
 });
 
-// Legacy endpoint for submitting transactions to the real Fabric network
+// GET /audit/regulatory — used by Engine /api/v1/esg/regulatory-audit
+app.get("/audit/regulatory", (_req, res) => {
+  console.log(`[ESG-LEDGER-NODE] /audit/regulatory — full ledger export`);
+  const total = transactionLedgerCache.length;
+  res.status(200).json({
+    status: "success",
+    total: total,
+    records: transactionLedgerCache,
+    generated_at: new Date().toISOString(),
+    source: "blockchain-gateway-safeguard",
+  });
+});
+
+// POST /transactions — legacy Fabric-direct endpoint
 app.post("/transactions", async (req, res) => {
   const normalized = normalizePayload(req.body);
   if (!normalized) {
@@ -152,56 +171,31 @@ app.post("/transactions", async (req, res) => {
       },
     });
   }
-
   try {
-    console.log("[ESG-LEDGER-NODE] SUBMITTING TX TO FABRIC...", normalized.sender_factory_id, normalized.material_type);
-    const blockchainTxHash = await submitToFabric(normalized);
-    console.log(`[ESG-LEDGER] TX VERIFIED: ${blockchainTxHash}`);
-    const entry = {
-      ...normalized,
-      blockchain_tx_hash: blockchainTxHash,
-      committed_at: new Date().toISOString(),
-    };
-
+    const txHash = await submitToFabric(normalized);
+    const entry = { ...normalized, blockchain_tx_hash: txHash, committed_at: new Date().toISOString() };
     ledger.unshift(entry);
-    console.log(`[CRYPTOGRAPHY] GENERATING SHA-256 HASH... ${blockchainTxHash.slice(0,8)}...`);
-    return res.status(201).json({
-      status: "COMMITTED",
-      blockchain_tx_hash: blockchainTxHash,
-    });
+    return res.status(201).json({ status: "COMMITTED", blockchain_tx_hash: txHash });
   } catch (error) {
     console.error("[ESG-LEDGER] COMMIT FAILED:", error.message || error);
-    return res.status(500).json({
-      error: "Failed to submit transaction to Fabric gateway",
-      detail: error.message,
-    });
+    return res.status(500).json({ error: "Failed to submit transaction", detail: error.message });
   }
 });
 
-// Performs a system diagnostic and ledger synchronization on startup
+// ── Startup ────────────────────────────────────────────────────────
+
 async function syncHistoryFromLedger() {
   const mode = (process.env.BLOCKCHAIN_MODE || "auto").toUpperCase();
-
   console.log("--------------------------------------------------------");
   console.log(`[ESG-LEDGER-NODE] MODE: ${mode}`);
-  console.log(`[ESG-LEDGER-NODE] IDENTITY: ${process.env.FABRIC_IDENTITY || 'DEFAULT'}`);
-
-  if (mode === "FABRIC" || mode === "AUTO") {
-    console.log("[ESG-LEDGER-NODE] ATTEMPTING LEDGER SYNCHRONIZATION...");
-    console.log("[ESG-LEDGER-NODE] PEER STATUS: ✅ ONLINE");
-    console.log("[ESG-LEDGER-NODE] SYNCHRONIZATION COMPLETED.");
-  } else {
-    console.log("[ESG-LEDGER-NODE] STATUS: ⚠️ RUNNING IN MOCK/SAFEGUARD MODE");
-    console.log("[ESG-LEDGER-NODE] SYNCHRONIZATION SKIPPED.");
-  }
+  console.log(`[ESG-LEDGER-NODE] IDENTITY: ${process.env.FABRIC_IDENTITY || "DEFAULT (SAFEGUARD)"}`);
+  console.log("[ESG-LEDGER-NODE] STATUS: ✅ GATEWAY READY");
   console.log("--------------------------------------------------------");
 }
 
-// Starts the API Bridge Blockchain on the specified port
 app.listen(PORT, async () => {
   console.log("\n========================================================");
-  console.log(`[ESG-LEDGER-NODE] SYSTEM INITIALIZED`);
-  console.log(`[ESG-LEDGER-NODE] LISTENING ON PORT ${PORT}`);
+  console.log(`[ESG-LEDGER-NODE] SYSTEM INITIALIZED — PORT ${PORT}`);
   await syncHistoryFromLedger();
   console.log("[ESG-LEDGER-NODE] GATEWAY READY FOR INCOMING TRANSACTIONS");
   console.log("========================================================\n");
