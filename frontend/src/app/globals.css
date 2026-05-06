@@ -9,12 +9,14 @@
   --foreground: #171717;
 }
 
+/* Removed to enforce light mode 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
+*/
 
 body {
   color: var(--foreground);
@@ -26,6 +28,31 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Hide scrollbar for specific elements like the sidebar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* Global Blockchain Terminal Hacker Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a; /* Dark slate background */
+}
+::-webkit-scrollbar-thumb {
+  background: #10b981; /* Emerald hacker green */
+  border-radius: 0px; /* Sharp terminal edges */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #059669; /* Darker emerald on hover */
 }
 
 @layer base {

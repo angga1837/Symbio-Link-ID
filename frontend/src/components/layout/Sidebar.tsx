@@ -16,10 +16,7 @@ import {
   MapPin,
   Shield,
   Map,
-  LogOut,
 } from "lucide-react";
-import { clearAuth } from "@/lib/auth";
-
 const navSections = [
   {
     label: "Overview",
@@ -52,15 +49,8 @@ const navSections = [
   },
 ];
 
-import MockAccountSwitcher from "@/components/layout/MockAccountSwitcher";
-
 export default function Sidebar() {
   const pathname = usePathname();
-
-  const handleLogout = () => {
-    clearAuth();
-    window.location.href = "/login";
-  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-slate-900">
@@ -76,7 +66,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-6">
         {navSections.map((section) => (
           <div key={section.label}>
             <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
@@ -109,18 +99,6 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
-
-      {/* Bottom Actions */}
-      <div className="border-t border-slate-700/50 p-3 space-y-2">
-        <MockAccountSwitcher />
-        <button
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </button>
-      </div>
     </aside>
   );
 }

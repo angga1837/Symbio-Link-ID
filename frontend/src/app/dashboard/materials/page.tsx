@@ -11,7 +11,7 @@ export default function MaterialsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<MaterialListing[]>("/api/v1/materials/")
+    api.get<MaterialListing[]>("/api/v1/materials/my")
       .then(setListings)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -30,8 +30,8 @@ export default function MaterialsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Digital Material Passports</h1>
-          <p className="text-slate-600">Browse and list industrial waste materials for exchange</p>
+          <h1 className="text-2xl font-extrabold text-slate-900">My Material Passports</h1>
+          <p className="text-slate-600">Manage your organization's digital material pipelines for exchange</p>
         </div>
         <Link
           href="/dashboard/materials/new"

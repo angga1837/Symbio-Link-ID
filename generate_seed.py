@@ -1,4 +1,6 @@
-import asyncio
+﻿import sys
+
+code = '''import asyncio
 import uuid
 import random
 from datetime import datetime, timezone, timedelta
@@ -159,3 +161,8 @@ async def seed_data():
 
 if __name__ == "__main__":
     asyncio.run(seed_data())
+'''
+
+with open('engine/seed_mock.py', 'w', encoding='utf-8') as f:
+    f.write(code)
+

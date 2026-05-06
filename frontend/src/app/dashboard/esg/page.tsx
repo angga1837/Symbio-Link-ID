@@ -230,7 +230,7 @@ export default function ESGLedgerPage() {
                   <th className="px-4 py-3">Date</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-slate-700">
                 {data.records.map((r) => (
                   <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 capitalize">{r.record_type.replace(/_/g, " ")}</td>
@@ -283,7 +283,7 @@ export default function ESGLedgerPage() {
                   <th className="px-4 py-3">Committed At</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-slate-700">
                 {audit.records.slice(0, 20).map((rec, i) => (
                   <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="px-4 py-3 capitalize font-medium">{rec.record_type?.replace(/_/g, " ") ?? "—"}</td>

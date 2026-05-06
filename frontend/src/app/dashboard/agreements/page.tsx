@@ -66,7 +66,7 @@ export default function AgreementsPage() {
                 <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-slate-700">
               {agreements.map((a) => (
                 <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{a.id.slice(0, 8)}...</td>

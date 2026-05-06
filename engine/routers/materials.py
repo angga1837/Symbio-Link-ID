@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
@@ -15,6 +15,7 @@ from schemas.material import (
 from predictor import predict_quality_v2
 from vision_predictor import predict_image
 from config import get_settings
+from services.bot_service import simulate_buyer_bots
 
 router = APIRouter(prefix="/api/v1/materials", tags=["Material Passports"])
 settings = get_settings()
@@ -65,6 +66,7 @@ async def classify_image(file: UploadFile = File(...), user: User = Depends(get_
 @router.post("/", response_model=MaterialListingResponse, status_code=201)
 async def create_listing(
     data: MaterialListingCreate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -105,8 +107,13 @@ async def create_listing(
         image_urls=data.image_urls or [],
     )
     db.add(listing)
-    await db.flush()
+    await db.commit()
     await db.refresh(listing)
+    
+    # Automatically spawn buyer bots to interact with this new listing
+    if listing.status == "listed":
+        background_tasks.add_task(simulate_buyer_bots, listing.id)
+        
     return listing
 
 
