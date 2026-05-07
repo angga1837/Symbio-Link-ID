@@ -99,12 +99,13 @@ async def simulate_buyer_bots(listing_id: uuid.UUID):
                     match.status = "contracted"
                     agrmnt = Agreement(
                         negotiation_id=neg.id,
-                        buyer_org_id=match.receiver_org_id,
-                        seller_org_id=match.sender_org_id,
+                        match_id=match.id,
+                        receiver_org_id=match.receiver_org_id,
+                        sender_org_id=match.sender_org_id,
                         agreed_price_per_kg=price,
                         agreed_volume_kg=match.matched_volume_kg,
                         payment_terms=payment_term,
-                        escrow_status="locked" if payment_term == "escrow" else None,
+                        escrow_status="funded" if payment_term == "escrow" else "pending",
                         status="active"
                     )
                     db.add(agrmnt)
@@ -113,13 +114,14 @@ async def simulate_buyer_bots(listing_id: uuid.UUID):
                     # Also create a shipment
                     shipment = Shipment(
                         agreement_id=agrmnt.id,
-                        transporter_org_id=match.receiver_org_id,
-                        origin_facility_id=match.sender_facility,
-                        destination_facility_id=match.receiver_facility,
+                        transporter_org=match.receiver_org_id,
                         status="in_transit",
-                        current_lat=-6.175,
-                        current_lon=106.827,
-                        estimated_arrival=datetime.now(timezone.utc) + timedelta(days=2)
+                        pickup_lat=-6.175,
+                        pickup_lng=106.827,
+                        delivery_lat=-6.200,
+                        delivery_lng=106.850,
+                        distance_km=match.transport_distance_km,
+                        vehicle_id=f"TRK-{random.randint(1000, 9999)}"
                     )
                     db.add(shipment)
 

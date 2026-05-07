@@ -27,9 +27,14 @@ def create_access_token(data: dict) -> str:
 async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
     """Register a new organization + owner user."""
     # Check email uniqueness
-    existing = await db.execute(select(User).where(User.email == data.email))
-    if existing.scalar_one_or_none():
+    existing_user = await db.execute(select(User).where(User.email == data.email))
+    if existing_user.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Email already registered")
+        
+    # Check tax_id uniqueness
+    existing_org = await db.execute(select(Organization).where(Organization.tax_id == data.tax_id))
+    if existing_org.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Tax ID already registered")
 
     # Create org
     org = Organization(
