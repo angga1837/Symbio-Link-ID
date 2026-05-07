@@ -86,8 +86,8 @@ export default function ESGLedgerPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Executive ESG Reporting Suite</h1>
-        <p className="text-slate-600">Scope 3 emissions ledger, green certificates & blockchain audit trail</p>
+        <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">Executive ESG Reporting Suite</h1>
+        <p className="text-sm text-slate-600">Scope 3 emissions ledger, green certificates & blockchain audit trail</p>
       </div>
 
       {/* ── Baseline vs Optimised Comparison ─────────────────────────── */}
@@ -147,13 +147,13 @@ export default function ESGLedgerPage() {
       </div>
 
       {/* ── KPI Cards ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs uppercase tracking-wide font-semibold text-slate-500">Total CO₂ Offset</p>
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </div>
-          <p className="text-3xl font-extrabold text-emerald-600">
+          <p className="text-2xl md:text-3xl font-extrabold text-emerald-600">
             {(data?.total_co2_offset_kg ?? 0).toLocaleString()}
             <span className="text-base font-normal text-slate-500 ml-1">kg</span>
           </p>
@@ -164,17 +164,17 @@ export default function ESGLedgerPage() {
             <p className="text-xs uppercase tracking-wide font-semibold text-slate-500">ESG Records</p>
             <Leaf className="h-4 w-4 text-blue-500" />
           </div>
-          <p className="text-3xl font-extrabold text-blue-600">
+          <p className="text-2xl md:text-3xl font-extrabold text-blue-600">
             {data?.record_count ?? 0}
           </p>
           <p className="text-xs text-slate-400 mt-1">Blockchain-verified events</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs uppercase tracking-wide font-semibold text-slate-500">Green Certificates</p>
             <Award className="h-4 w-4 text-amber-500" />
           </div>
-          <p className="text-3xl font-extrabold text-amber-600">{certs.length}</p>
+          <p className="text-2xl md:text-3xl font-extrabold text-amber-600">{certs.length}</p>
           <p className="text-xs text-slate-400 mt-1">Immutable compliance documents</p>
         </div>
       </div>
@@ -188,7 +188,7 @@ export default function ESGLedgerPage() {
           </div>
           <div className="divide-y divide-slate-100">
             {certs.map((cert) => (
-              <div key={cert.id} className="px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition">
+              <div key={cert.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 transition">
                 <div>
                   <p className="font-semibold text-slate-800 font-mono text-sm">{cert.certificate_number}</p>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -196,9 +196,9 @@ export default function ESGLedgerPage() {
                     Material reused: <strong>{cert.material_reused_kg.toLocaleString()} kg</strong>
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-mono text-blue-600">{cert.blockchain_tx_hash.slice(0, 16)}...</p>
-                  <p className="text-xs text-slate-400">{new Date(cert.issued_at).toLocaleDateString()}</p>
+                <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between sm:justify-end items-center sm:items-end gap-2 sm:gap-0">
+                  <p className="text-[10px] sm:text-xs font-mono text-blue-600">{cert.blockchain_tx_hash.slice(0, 16)}...</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">{new Date(cert.issued_at).toLocaleDateString()}</p>
                 </div>
               </div>
             ))}
@@ -218,7 +218,36 @@ export default function ESGLedgerPage() {
               Blockchain Verified
             </span>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile Scope 3 Card View */}
+          <div className="grid grid-cols-1 gap-4 md:hidden p-4">
+            {data.records.map((r) => (
+              <div key={r.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700 capitalize">{r.record_type.replace(/_/g, " ")}</span>
+                  {r.verified ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
+                      <Shield className="h-3 w-3" /> VERIFIED
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400">PENDING</span>
+                  )}
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <span className="text-lg font-extrabold text-slate-900">{r.value.toLocaleString()}</span>
+                    <span className="text-xs text-slate-500 ml-1">{r.unit}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-mono text-blue-600">{r.blockchain_tx_hash?.slice(0, 12)}...</p>
+                    <p className="text-[10px] text-slate-400">{new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
                 <tr>
@@ -273,32 +302,53 @@ export default function ESGLedgerPage() {
             No blockchain transactions yet. Complete your first material exchange.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">TX Hash</th>
-                  <th className="px-4 py-3">Mode</th>
-                  <th className="px-4 py-3">Committed At</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-700">
-                {audit.records.slice(0, 20).map((rec, i) => (
-                  <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-3 capitalize font-medium">{rec.record_type?.replace(/_/g, " ") ?? "—"}</td>
-                    <td className="px-4 py-3 font-mono text-blue-600">{rec.blockchain_tx_hash?.slice(0, 20)}...</td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 font-semibold ${rec.mode === "fabric_peer_commit" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-                        {rec.mode === "fabric_peer_commit" ? "On-Chain" : "Safeguard"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">{new Date(rec.committed_at).toLocaleString()}</td>
+          <>
+            {/* Mobile Audit Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-4">
+              {audit.records.slice(0, 10).map((rec, i) => (
+                <div key={i} className="rounded-lg border border-slate-100 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 capitalize">{rec.record_type?.replace(/_/g, " ") ?? "—"}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${rec.mode === "fabric_peer_commit" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                      {rec.mode === "fabric_peer_commit" ? "ON-CHAIN" : "SAFEGUARD"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[10px] font-mono text-blue-600 truncate">{rec.blockchain_tx_hash}</p>
+                    <p className="text-[10px] text-slate-400">{new Date(rec.committed_at).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Audit Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">TX Hash</th>
+                    <th className="px-4 py-3">Mode</th>
+                    <th className="px-4 py-3">Committed At</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="text-slate-700">
+                  {audit.records.slice(0, 20).map((rec, i) => (
+                    <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
+                      <td className="px-4 py-3 capitalize font-medium">{rec.record_type?.replace(/_/g, " ") ?? "—"}</td>
+                      <td className="px-4 py-3 font-mono text-blue-600">{rec.blockchain_tx_hash?.slice(0, 20)}...</td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2 py-0.5 font-semibold ${rec.mode === "fabric_peer_commit" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                          {rec.mode === "fabric_peer_commit" ? "On-Chain" : "Safeguard"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">{new Date(rec.committed_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

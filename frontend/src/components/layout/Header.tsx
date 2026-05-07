@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { getAuth, clearAuth, saveAuth } from "@/lib/auth";
-import { User, Bell, ChevronDown, LogOut, Users } from "lucide-react";
+import { User, Bell, ChevronDown, LogOut, Users, Menu } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
 
@@ -13,7 +13,7 @@ const MOCK_USERS = [
   { name: "EcoBricks Plant", email: "admin@ecobricks.com", password: "symbio2026" },
 ];
 
-export default function Header() {
+export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [user, setUser] = useState<{ org_name: string; role: string, email?: string } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
@@ -59,17 +59,25 @@ export default function Header() {
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1).replace(/[-_]/g, " "));
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
-      <div className="flex items-center gap-2 text-sm">
-        <span className="font-medium text-slate-900">Dashboard</span>
-        {breadcrumb.map((crumb, i) => (
-          <React.Fragment key={i}>
-            <span className="text-slate-300">/</span>
-            <span className="text-slate-600">{crumb}</span>
-          </React.Fragment>
-        ))}
-      </div>
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6 shadow-sm">
       <div className="flex items-center gap-3">
+        <button 
+          onClick={onMenuClick}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 md:hidden transition"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="hidden sm:flex items-center gap-2 text-sm">
+          <span className="font-medium text-slate-900">Dashboard</span>
+          {breadcrumb.map((crumb, i) => (
+            <React.Fragment key={i}>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-600">{crumb}</span>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 md:gap-3">
         <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition">
           <Bell className="h-4 w-4" />
         </button>
@@ -77,10 +85,10 @@ export default function Header() {
           <div className="relative" ref={dropdownRef}>
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-3 border-l border-slate-200 pl-3 hover:opacity-80 transition cursor-pointer"
+              className="flex items-center gap-2 md:gap-3 border-l border-slate-200 pl-2 md:pl-3 hover:opacity-80 transition cursor-pointer"
             >
-              <div className="text-right">
-                <p className="text-sm font-semibold text-slate-900">{user.org_name}</p>
+              <div className="text-right hidden xs:block">
+                <p className="text-sm font-semibold text-slate-900 truncate max-w-[120px]">{user.org_name}</p>
                 <p className="text-[11px] text-slate-500 capitalize">{user.role}</p>
               </div>
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white">

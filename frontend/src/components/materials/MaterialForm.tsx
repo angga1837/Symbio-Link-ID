@@ -229,7 +229,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
           placeholder="Detailed description of waste material..." />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Volume (kg)</label>
           <input type="number" className="w-full p-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder:text-slate-400"
@@ -249,7 +249,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
       <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
         <h3 className="text-sm font-semibold text-slate-700 mb-1">Chemical Specifications</h3>
         <p className="text-xs text-slate-400 mb-3">More fields = more accurate AI purity score</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">pH Level (0–14)</label>
             <input type="number" className="w-full p-2 border border-slate-300 rounded-lg text-sm text-slate-900 bg-white placeholder:text-slate-400"

@@ -136,19 +136,23 @@ export default function NegotiationRoomPage() {
   const isResolved = neg.status === "accepted" || neg.status === "rejected" || neg.status === "expired";
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <button onClick={() => router.back()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">
-          <ArrowLeft className="h-4 w-4 text-slate-600" />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-extrabold text-slate-900">Negotiation Room</h1>
-          <p className="text-sm text-slate-500">Secure B2B terms negotiation</p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">
+            <ArrowLeft className="h-4 w-4 text-slate-600" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">Negotiation Room</h1>
+            <p className="text-xs md:text-sm text-slate-500">Secure B2B terms negotiation</p>
+          </div>
         </div>
-        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusColors[neg.status] || "bg-slate-100 text-slate-600"}`}>
-          {neg.status.replace("_", " ").toUpperCase()}
-        </span>
+        <div className="flex justify-start sm:justify-end">
+          <span className={`rounded-full border px-3 py-1 text-[10px] md:text-xs font-semibold ${statusColors[neg.status] || "bg-slate-100 text-slate-600"}`}>
+            {neg.status.replace("_", " ").toUpperCase()}
+          </span>
+        </div>
       </div>
 
       {/* Match Summary */}
@@ -156,10 +160,10 @@ export default function NegotiationRoomPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 mb-3">Symbiosis Match Summary</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><p className="text-xs text-slate-500">Volume</p><p className="font-bold text-slate-800">{match.matched_volume_kg.toLocaleString()} kg</p></div>
-            <div><p className="text-xs text-slate-500">Distance</p><p className="font-bold text-slate-800">{match.transport_distance_km?.toFixed(0)} km</p></div>
-            <div><p className="text-xs text-slate-500">CO₂ Saved</p><p className="font-bold text-emerald-600">{match.co2_saved_kg?.toFixed(1)} kg</p></div>
-            <div><p className="text-xs text-slate-500">Match Score</p><p className="font-bold text-blue-600">{match.match_score?.toFixed(3)}</p></div>
+            <div className="bg-slate-50 p-2 rounded-lg md:bg-transparent md:p-0"><p className="text-[10px] md:text-xs text-slate-500">Volume</p><p className="font-bold text-slate-800">{match.matched_volume_kg.toLocaleString()} kg</p></div>
+            <div className="bg-slate-50 p-2 rounded-lg md:bg-transparent md:p-0"><p className="text-[10px] md:text-xs text-slate-500">Distance</p><p className="font-bold text-slate-800">{match.transport_distance_km?.toFixed(0)} km</p></div>
+            <div className="bg-slate-50 p-2 rounded-lg md:bg-transparent md:p-0"><p className="text-[10px] md:text-xs text-slate-500">CO₂ Saved</p><p className="font-bold text-emerald-600">{match.co2_saved_kg?.toFixed(1)} kg</p></div>
+            <div className="bg-slate-50 p-2 rounded-lg md:bg-transparent md:p-0"><p className="text-[10px] md:text-xs text-slate-500">Match Score</p><p className="font-bold text-blue-600">{match.match_score?.toFixed(3)}</p></div>
           </div>
         </div>
       )}
@@ -245,7 +249,7 @@ export default function NegotiationRoomPage() {
                 <RefreshCw className="h-4 w-4 text-amber-500" /> Submit Counter-Offer
               </h2>
               <form onSubmit={handleCounterOffer} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Price per kg (USD)</label>
                     <input

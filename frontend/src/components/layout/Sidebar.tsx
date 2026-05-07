@@ -16,7 +16,14 @@ import {
   MapPin,
   Shield,
   Map,
+  X,
 } from "lucide-react";
+
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
 const navSections = [
   {
     label: "Overview",
@@ -49,20 +56,30 @@ const navSections = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-slate-900">
+    <aside className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-slate-900 transition-transform duration-300 ease-in-out ${
+      isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+    }`}>
       {/* Brand */}
-      <div className="flex h-16 items-center gap-3 border-b border-slate-700/50 px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-          <Building2 className="h-4 w-4 text-white" />
+      <div className="flex h-16 items-center justify-between border-b border-slate-700/50 px-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
+            <Building2 className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold tracking-tight text-white">Symbio-Link ID</h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400">Enterprise</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-sm font-bold tracking-tight text-white">Symbio-Link ID</h1>
-          <p className="text-[10px] uppercase tracking-widest text-slate-400">Enterprise</p>
-        </div>
+        <button 
+          onClick={onClose}
+          className="md:hidden text-slate-400 hover:text-white transition"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -81,6 +98,9 @@ export default function Sidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={() => {
+                        if (window.innerWidth < 768) onClose?.();
+                      }}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                         isActive
                           ? "bg-emerald-500/15 text-emerald-400"

@@ -28,14 +28,14 @@ export default function MaterialsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">My Material Passports</h1>
-          <p className="text-slate-600">Manage your organization's digital material pipelines for exchange</p>
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">My Material Passports</h1>
+          <p className="text-sm text-slate-600">Manage your organization's digital material pipelines for exchange</p>
         </div>
         <Link
           href="/dashboard/materials/new"
-          className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition"
+          className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" /> New Listing
         </Link>

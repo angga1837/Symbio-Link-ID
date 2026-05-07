@@ -86,8 +86,8 @@ export default function MatchesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">MILP Matchmaking Results</h1>
-        <p className="text-slate-600">Algorithmically optimized symbiosis pairings</p>
+        <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">MILP Matchmaking Results</h1>
+        <p className="text-sm text-slate-600">Algorithmically optimized symbiosis pairings</p>
       </div>
 
       {/* Run Matchmaking on unmatched materials */}
@@ -96,7 +96,7 @@ export default function MatchesPage() {
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Materials Ready for Matchmaking</h3>
           <div className="space-y-2">
             {listedMaterials.map((mat) => (
-              <div key={mat.id} className="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+              <div key={mat.id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg bg-slate-50 p-3 gap-3">
                 <div className="flex items-center gap-3">
                   <Package className="h-5 w-5 text-slate-400" />
                   <div>
@@ -107,7 +107,7 @@ export default function MatchesPage() {
                 <button
                   onClick={() => handleFindMatches(mat.id)}
                   disabled={findingFor === mat.id}
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50 w-full sm:w-auto"
                 >
                   {findingFor === mat.id ? (
                     <><Loader2 className="h-3 w-3 animate-spin" /> Running...</>
@@ -139,9 +139,9 @@ export default function MatchesPage() {
         <div className="space-y-3">
           {matches.map((m) => (
             <div key={m.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 flex-shrink-0">
                     <Truck className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
@@ -153,7 +153,7 @@ export default function MatchesPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2">
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[m.status]}`}>
                     {m.status}
                   </span>

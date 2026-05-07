@@ -64,14 +64,14 @@ export default function FacilitiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Facility Management</h1>
-          <p className="text-slate-600">Geolocate your factories to feed the MILP logistics engine</p>
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900">Facility Management</h1>
+          <p className="text-sm text-slate-600">Geolocate your factories to feed the MILP logistics engine</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition"
+          className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" /> Add Facility
         </button>
@@ -79,13 +79,13 @@ export default function FacilitiesPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700">Name</label>
               <input type="text" required className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Pabrik Utama" />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700">Address</label>
               <input type="text" className="mt-1 block w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 bg-white placeholder:text-slate-400"
                 value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Jl. Industri No. 1, Surabaya" />
