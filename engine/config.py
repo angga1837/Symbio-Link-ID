@@ -40,4 +40,19 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    settings = Settings()
+
+    # Normalize DATABASE_URL: many platforms inject a sync-style
+    # URL like `postgres://...` or `postgresql://...`. Ensure we
+    # use the asyncpg driver so SQLAlchemy doesn't try to import
+    # `psycopg2` (which causes ModuleNotFoundError in the container).
+    db_url = os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    if db_url:
+        # handle legacy/heroku style `postgres://` and bare `postgresql://`
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("postgresql://") and "+asyncpg" not in db_url:
+            db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    settings.DATABASE_URL = db_url
+    return settings
