@@ -4,9 +4,9 @@
 
 1. Ensure Docker Desktop is running.
 2. Execute: `docker-compose up --build -d`
-3. Access Frontend: `http://localhost:3000`
-4. Access Engine API: `http://localhost:8000/docs`
-5. Access Blockchain Microfab: `http://localhost:8080`
+3. Access Frontend: `http://localhost:3001`
+4. Access Engine API: `http://localhost:8000`
+5. Access Blockchain Microfab: `http://localhost:4000`
 
 ## 📁 Project Structure Reference (Subject to Change)
 
