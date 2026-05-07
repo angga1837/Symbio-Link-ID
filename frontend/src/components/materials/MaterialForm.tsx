@@ -67,7 +67,8 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
         title: "Classification Error",
         description: msg,
         variant: "destructive",
-      }); finally {
+      });
+    } finally {
       setClassifying(false);
     }
   };

@@ -26,12 +26,23 @@ export default function FacilitiesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Client-side validation to catch React state issues before hitting the API
+    if (!form.name.trim()) {
+      toast({ title: "Validation Error", description: "Facility name is required.", variant: "destructive" });
+      return;
+    }
+    const lat = parseFloat(form.latitude);
+    const lng = parseFloat(form.longitude);
+    if (isNaN(lat) || isNaN(lng)) {
+      toast({ title: "Validation Error", description: "Valid latitude and longitude are required.", variant: "destructive" });
+      return;
+    }
     try {
       await api.post("/api/v1/facilities/", {
-        name: form.name,
+        name: form.name.trim(),
         address: form.address || undefined,
-        latitude: parseFloat(form.latitude) || 0,
-        longitude: parseFloat(form.longitude) || 0,
+        latitude: lat,
+        longitude: lng,
         facility_type: form.facility_type,
         capacity_kg: form.capacity_kg ? parseFloat(form.capacity_kg) : 0,
       });
