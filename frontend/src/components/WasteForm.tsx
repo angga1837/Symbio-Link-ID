@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { toast } from "@/components/ui/toaster";
 import { z } from "zod";
+import { getApiBase } from "@/lib/api";
 
 const formSchema = z.object({
   sender_factory_id: z.string().min(1, "Factory ID is required"),
@@ -49,7 +50,7 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
     formDataImage.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/classify", {
+      const response = await fetch(`${getApiBase()}/classify`, {
         method: "POST",
         body: formDataImage,
       });
@@ -88,7 +89,7 @@ export default function WasteForm({ onResult }: { onResult: (data: OptimizationR
         water_content_percentage: formData.water_content_percentage ? parseFloat(formData.water_content_percentage) : undefined,
       });
 
-      const response = await fetch("http://localhost:8000/optimize", {
+      const response = await fetch(`${getApiBase()}/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsedData),

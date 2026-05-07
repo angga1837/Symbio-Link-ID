@@ -1,8 +1,8 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-const getApiBase = () => {
+export const getApiBase = () => {
   if (!API_BASE) {
-    throw new Error("NEXT_PUBLIC_API_URL is not set");
+    throw new Error("NEXT_PUBLIC_API_URL is not set on the frontend service");
   }
   return API_BASE;
 };

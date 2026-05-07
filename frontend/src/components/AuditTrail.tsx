@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { getApiBase } from "@/lib/api";
 
 interface AuditRow {
   sender_factory_id: string;
@@ -21,7 +22,7 @@ export default function AuditTrail({ rows, refreshTrigger }: { rows: AuditRow[];
     const fetchAuditTrail = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("http://localhost:8000/audit");
+        const response = await fetch(`${getApiBase()}/audit`);
         if (response.ok) {
           const data = await response.json();
           setAuditRows(data);
