@@ -6,11 +6,12 @@ const { submitToFabric } = require("./fabricGateway");
 const app = express();
 app.use(express.json());
 
-const PORT = 4000;
+const PORT = Number(process.env.PORT || process.env.BLOCKCHAIN_PORT || "4000");
+if (Number.isNaN(PORT)) {
+  throw new Error("PORT must be a number");
+}
 const ledger = [];
 let transactionLedgerCache = [];
-
-// ── Helpers ──────────────────────────────────────────────────────────
 
 function normalizePayload(payload) {
   if (!payload || typeof payload !== "object") return null;
@@ -27,8 +28,6 @@ const generateTxHash = () => {
   return crypto.randomBytes(32).toString("hex");
 };
 
-// ── Routes ────────────────────────────────────────────────────────────
-
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "blockchain-gateway", mode: process.env.BLOCKCHAIN_MODE || "auto" });
 });
@@ -43,7 +42,6 @@ app.get("/transactions/:txHash", (req, res) => {
   return res.json(item);
 });
 
-// POST /commit — primary ingestion from Engine
 app.post("/commit", async (req, res) => {
   console.log("\n========================================================");
   console.log("[ESG-LEDGER-NODE] INCOMING TRANSACTION DETECTED");
@@ -95,7 +93,6 @@ app.post("/commit", async (req, res) => {
   }
 });
 
-// POST /shipment-status — called by engine blockchain_service.commit_shipment_status
 app.post("/shipment-status", (req, res) => {
   const { shipment_id, status, metadata } = req.body;
   if (!shipment_id || !status) {
@@ -116,7 +113,6 @@ app.post("/shipment-status", (req, res) => {
   res.status(201).json({ status: "success", tx_hash: txHash });
 });
 
-// POST /certificates — called by engine blockchain_service.commit_certificate
 app.post("/certificates", (req, res) => {
   const certData = req.body;
   if (!certData || !certData.certificate_number) {
@@ -135,7 +131,6 @@ app.post("/certificates", (req, res) => {
   res.status(201).json({ status: "success", tx_hash: txHash });
 });
 
-// GET /history — used by Engine /audit endpoint
 app.get("/history", (_req, res) => {
   console.log(`[ESG-LEDGER-NODE] /history — ${transactionLedgerCache.length} records`);
   res.status(200).json({
@@ -145,7 +140,6 @@ app.get("/history", (_req, res) => {
   });
 });
 
-// GET /audit/regulatory — used by Engine /api/v1/esg/regulatory-audit
 app.get("/audit/regulatory", (_req, res) => {
   console.log(`[ESG-LEDGER-NODE] /audit/regulatory — full ledger export`);
   const total = transactionLedgerCache.length;
@@ -158,7 +152,6 @@ app.get("/audit/regulatory", (_req, res) => {
   });
 });
 
-// POST /transactions — legacy Fabric-direct endpoint
 app.post("/transactions", async (req, res) => {
   const normalized = normalizePayload(req.body);
   if (!normalized) {
@@ -181,8 +174,6 @@ app.post("/transactions", async (req, res) => {
     return res.status(500).json({ error: "Failed to submit transaction", detail: error.message });
   }
 });
-
-// ── Startup ────────────────────────────────────────────────────────
 
 async function syncHistoryFromLedger() {
   const mode = (process.env.BLOCKCHAIN_MODE || "auto").toUpperCase();

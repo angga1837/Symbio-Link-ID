@@ -1,4 +1,11 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+const getApiBase = () => {
+  if (!API_BASE) {
+    throw new Error("NEXT_PUBLIC_API_URL is not set");
+  }
+  return API_BASE;
+};
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token =
@@ -6,7 +13,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
       ? localStorage.getItem("symbio_token")
       : null;
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${getApiBase()}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -45,7 +52,7 @@ export const api = {
       typeof window !== "undefined"
         ? localStorage.getItem("symbio_token")
         : null;
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(`${getApiBase()}${path}`, {
       method: "POST",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

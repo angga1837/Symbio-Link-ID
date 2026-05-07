@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [ENGINE] %(message)s')
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] [ENGINE] %(message)s")
 logger = logging.getLogger(__name__)
 
 # ── Import all routers ──────────────────────────────────────────────
@@ -27,6 +29,11 @@ from seed_mock import seed_data
 import models  # noqa: F401 — triggers all ORM model imports so Base.metadata is populated
 
 
+def get_cors_origins() -> list[str]:
+    raw = os.getenv("CORS_ALLOW_ORIGINS") or os.getenv("FRONTEND_URL") or ""
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create all database tables on startup (idempotent)."""
@@ -43,7 +50,6 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# ── Application ────────────────────────────────────────────────────
 app = FastAPI(
     title="Symbio-Link ID Engine",
     version="2.0.0",
@@ -51,9 +57,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+cors_origins = get_cors_origins()
+if not cors_origins:
+    logger.warning(
+        "CORS_ALLOW_ORIGINS or FRONTEND_URL is not set; CORS will block cross-origin requests."
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

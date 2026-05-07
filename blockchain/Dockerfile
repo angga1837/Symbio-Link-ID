@@ -1,9 +1,9 @@
-FROM node:18-alpine
+FROM node:18-slim
 WORKDIR /app
-COPY package.json .
-RUN npm install
+COPY package.json ./
+RUN npm install --omit=dev
 COPY . .
-# In-container default; local `npm start` uses 3001 in gateway.js to avoid clashing with Next.js on the host.
-ENV PORT=3000
-EXPOSE 3000
+ENV NODE_ENV=production
+ENV PORT=4000
+EXPOSE 4000
 CMD ["node", "gateway.js"]
