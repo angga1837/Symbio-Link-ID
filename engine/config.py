@@ -1,10 +1,16 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+import os
 
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://symbio:symbio_enterprise_2026@localhost:5433/symbio_enterprise"
+    # Railway/production uses DATABASE_URL env var (injected by Railway)
+    # Local dev defaults to localhost PostgreSQL
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL",
+        "postgresql+asyncpg://symbio:symbio_enterprise_2026@localhost:5433/symbio_enterprise"
+    )
 
     # Auth
     JWT_SECRET: str = "CHANGE_ME_IN_PRODUCTION"

@@ -36,17 +36,29 @@ def get_cors_origins() -> list[str]:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create all database tables on startup (idempotent)."""
-    async with db_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database tables initialised.")
-    settings = get_settings()
-    if settings.SEED_MOCK_DATA:
-        try:
-            await seed_data(force=settings.SEED_MOCK_FORCE)
-            logger.info("Mock data seed completed.")
-        except Exception as exc:
-            logger.error("Mock data seed failed: %s", exc)
+    """Create all database tables on startup (idempotent).
+    
+    Gracefully handles connection failures to support:
+    - Local development without PostgreSQL running
+    - Railway/containerized deployments where DB may not be immediately available
+    - Testing environments without a real database
+    """
+    try:
+        async with db_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables initialised.")
+        settings = get_settings()
+        if settings.SEED_MOCK_DATA:
+            try:
+                await seed_data(force=settings.SEED_MOCK_FORCE)
+                logger.info("Mock data seed completed.")
+            except Exception as exc:
+                logger.error("Mock data seed failed: %s", exc)
+    except Exception as exc:
+        # Database unavailable on startup - log warning but allow app to start
+        # This supports: local dev without DB, Railway deployment during init, testing
+        logger.warning("Database connection failed on startup: %s", exc)
+        logger.warning("App starting without database. Some features may be unavailable.")
     yield
 
 
