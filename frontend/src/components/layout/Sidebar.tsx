@@ -60,7 +60,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-slate-900 transition-transform duration-300 ease-in-out ${
+    <aside className={`fixed left-0 top-0 z-[9999] flex h-screen w-64 flex-col bg-slate-900 transition-transform duration-300 ease-in-out ${
       isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
     }`}>
       {/* Brand */}

@@ -184,7 +184,7 @@ export default function GeospatialMapPage() {
           <span className="text-slate-400">Loading ecosystem data...</span>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden" style={{ height: "520px" }}>
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden relative z-0" style={{ height: "520px" }}>
           <LeafletMap
             facilities={data?.facilities ?? []}
             routes={data?.routes.routes ?? []}

@@ -1,24 +1,5 @@
 # Symbio-Link-ID
 
-<!--
-[SYSTEM_CONTEXT_LOCK: DO NOT DELETE OR MODIFY THIS BLOCK]
-ROLE: Senior AI Architect & Master Digital Scribe
-PROJECT: "Symbio-Link ID" - 7-Day MVP Hackathon.
-VISION: B2B Industrial Symbiosis Marketplace tackling systemic waste inefficiency via circular economy[cite: 1].
-CORE PILLARS:
-  1. MILP (Mixed-Integer Linear Programming): Optimize material/energy flow, minimize raw material costs & CO2[cite: 1].
-  2. Machine Learning (Trust Layer): Predict waste quality with 98.6% extraction efficiency[cite: 1].
-  3. Blockchain (Hyperledger Fabric): Encrypted B2B Smart Contracts for ESG reporting integrity without trade-secret leaks[cite: 1].
-TECH STACK: FastAPI (Engine), Next.js 14 (Frontend), Hyperledger Microfab (Ledger). Docker Compose for orchestration.
-
-STRICT PROTOCOLS (ZERO DEVIATION):
-- RULE 1: `schema.json` is the absolute SOURCE OF TRUTH. Never hallucinate data variables.
-- RULE 2: 7-Day Hackathon Constraint. NO external heavy databases (MongoDB/MySQL). Use Blockchain state or JSON mocks.
-- RULE 3 (THE RECURSIVE DIRECTIVE): You are the Scribe. Whenever you update documentation, you MUST ensure this exact [SYSTEM_CONTEXT_LOCK] block remains intact at the very top.
-
-INSTRUCTION: Acknowledge this context lock. Await the specific micro-task from the user.
--->
-
 ## 🚀 How to Run (MVP)
 
 1. Ensure Docker Desktop is running.
@@ -31,41 +12,41 @@ INSTRUCTION: Acknowledge this context lock. Await the specific micro-task from t
 
 ```text
 /symbio-link-id (Root Workspace)
-├── docker-compose.yml          # Orkestrator utama (menjalankan Engine, Frontend, Microfab)
-├── schema.json                 # THE SOURCE OF TRUTH: Kontrak struktur data global
-├── PROJECT_LOG.md              # Log otomatis AI (Jejak rekam progress)
-├── README.md                   # Dokumentasi instalasi MVP untuk juri Hackathon
+├── docker-compose.yml          # Main orchestrator (Engine, Frontend, Microfab)
+├── schema.json                 # THE SOURCE OF TRUTH: Global data structure contract
+├── PROJECT_LOG.md              # Project history and development log
+├── README.md                   # Installation documentation for the MVP
 ├── .gitignore                  # Filter global (node_modules, __pycache__, .env, dll)
 │
-├── /engine                     # PIC: Anggota A (Python, AI/Math Logic)
+├── /engine                    
 │   ├── Dockerfile              # Setup environment python:3.10-slim
 │   ├── requirements.txt        # fastapi, uvicorn, pulp, scikit-learn, requests
 │   ├── main.py                 # FastAPI server & route definitions (Gatekeeper)
-│   ├── optimizer.py            # Logika MILP menggunakan library PuLP
-│   ├── predictor.py            # Model ML Scikit-Learn (Prediksi efisiensi 98.6%)
-│   └── mock_data.csv           # Dataset sintetis untuk training awal ML
+│   ├── optimizer.py            # MILP logic using PuLP library
+│   ├── predictor.py            # Scikit-Learn ML model (98.6% efficiency prediction)
+│   └── mock_data.csv           # Synthetic dataset for training
 │
-├── /blockchain                 # PIC: Anggota B (Node.js, Hyperledger Fabric)
-│   ├── package.json            # fabric-network, express (jika butuh bridge server)
-│   ├── gateway.js              # Node.js API Bridge (Menyambungkan Python ke Microfab)
-│   └── /chaincode              # Smart Contracts terenkripsi
+├── /blockchain                 # Module: Hyperledger Fabric (Node.js)
+│   ├── package.json            # fabric-network, express
+│   ├── gateway.js              # Node.js API Bridge (Connects Python to Microfab)
+│   └── /chaincode              # Encrypted Smart Contracts
 │       ├── package.json
-│       └── symbiosis_contract.js # Logika penulisan transaksi B2B ke ledger (Immutable)
+│       └── symbiosis_contract.js # Transaction logic (Immutable)
 │
-└── /frontend                   # PIC: Anggota C (Next.js 14, UI/UX)
+└── /frontend                   # Module: Frontend (Next.js 14, UI/UX)
     ├── Dockerfile              # Setup Node.js frontend environment
     ├── package.json            # next, react, tailwindcss, lucide-react, recharts
-    ├── tailwind.config.ts      # Konfigurasi styling UI
-    ├── components.json         # Konfigurasi Shadcn/UI
+    ├── tailwind.config.ts      # UI styling configuration
+    ├── components.json         # Shadcn/UI configuration
     ├── /app
-    │   ├── layout.tsx          # Root layout aplikasi B2B
-    │   ├── page.tsx            # Dashboard utama (Grafik aliran material & Emisi)
-    │   └── globals.css         # Styling global
+    │   ├── layout.tsx          # Root layout
+    │   ├── page.tsx            # Main dashboard
+    │   └── globals.css         # Global styling
     ├── /components
-    │   ├── WasteForm.tsx       # UI Input material, volume, pH (Terkoneksi ke schema.json)
-    │   └── AuditTrail.tsx      # Tabel verifikasi data dari Blockchain
+    │   ├── WasteForm.tsx       # UI for material input (linked to schema.json)
+    │   └── AuditTrail.tsx      # Blockchain verification table
     └── /lib
-        └── api.ts              # Konfigurasi Axios/Fetch untuk menembak /engine:8000
+        └── api.ts              # API client configuration
 ```
 
 ## 🛠️ Git & Branching Conventions

@@ -248,7 +248,7 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
 
       <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
         <h3 className="text-sm font-semibold text-slate-700 mb-1">Chemical Specifications</h3>
-        <p className="text-xs text-slate-400 mb-3">More fields = more accurate AI purity score</p>
+        <p className="text-xs text-slate-400 mb-3">More fields = more accurate estimated purity score</p>
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">pH Level (0–14)</label>
