@@ -62,9 +62,12 @@ export default function MaterialForm({ facilities }: { facilities: { id: string;
         variant: "success",
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Classification failed";
-      toast({ title: "Classification Error", description: msg, variant: "destructive" });
-    } finally {
+      const msg = err instanceof Error ? err.message : "Gagal klasifikasi gambar";
+      toast({
+        title: "Classification Error",
+        description: msg,
+        variant: "destructive",
+      }); finally {
       setClassifying(false);
     }
   };
