@@ -4,7 +4,9 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM node:18-slim AS builder
+ARG NEXT_PUBLIC_API_URL
 WORKDIR /app
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
